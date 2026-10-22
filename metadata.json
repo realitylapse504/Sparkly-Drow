@@ -1,0 +1,6 @@
+{
+  "name": "RecompOS — Body Transformation & GitHub Tracker",
+  "description": "Body recomposition command center featuring a 4-day ankle-friendly Upper/Lower workout split, 2,118 kcal macro & water tracker, curated food matrix, inch-loss analytics, and GitHub synchronization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

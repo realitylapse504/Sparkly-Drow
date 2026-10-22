@@ -1,0 +1,783 @@
+import type { FoodLogEntry, BodyMeasurementEntry, WeeklyConsistencyState } from '../utils/recompLogic';
+
+export interface ExercisePrescription {
+  id: string;
+  order: number;
+  name: string;
+  sets: number;
+  reps: string;
+  tip?: string;
+  ankleSwapOption?: {
+    swapName: string;
+    swapReps: string;
+    swapReason: string;
+  };
+  defaultWeightLbs: number;
+}
+
+export interface WorkoutDayPlan {
+  id: 'upper_a' | 'lower_a' | 'upper_b' | 'lower_b' | 'tracy_session';
+  dayLabel: string;
+  title: string;
+  subtitle: string;
+  ankleProtected: boolean;
+  focusSummary: string;
+  exercises: ExercisePrescription[];
+}
+
+export interface ApprovedFoodItem {
+  id: string;
+  name: string;
+  category: 'protein' | 'carb' | 'fat' | 'sweet';
+  subGroup: string;
+  servingNote: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  sugar: number;
+  saturatedFat: number;
+  glutenFreeNote?: boolean;
+  supportsPb2Addon?: boolean;
+  variants?: string[];
+}
+
+export const FOUR_CORE_PILLARS = [
+  {
+    number: '01',
+    title: 'Progressive Resistance Training',
+    role: 'The Stimulus',
+    summary:
+      'Gives your muscles a reason to grow and signals your body to hold onto existing lean mass while burning body fat for energy.',
+    keyPoints: [
+      'Focus on Compound Movements: Squats, deadlifts, bench presses, overhead presses, pull-ups, and rows recruit multiple muscle groups and burn more energy.',
+      'Progressive Overload: Continually challenge muscles over time by lifting heavier weights, doing more repetitions, or improving form and range of motion.',
+      'Frequency: 3 to 5 sessions per week — structured as your 4-Day Upper/Lower Split or Strength Training with Tracy 1x/week + 2 programmed sessions.',
+    ],
+  },
+  {
+    number: '02',
+    title: 'Nutrition & Caloric Management',
+    role: 'The Fuel',
+    summary:
+      'You cannot out-train a poor diet. Nutrition dictates fat loss, while resistance training dictates muscle growth.',
+    keyPoints: [
+      'The "Sweet Spot" Calorie Deficit: Moderate 15–20% deficit (300–500 kcal below maintenance; set at 2,118 kcal/day) preserves muscle growth and energy.',
+      'High Protein Intake: 129g daily (~0.8–1.0g per lb of target body weight) repairs muscle tissue and maximizes satiety.',
+      'Guardrails & Nutrient Quality: 282g complex carbs for workout energy, 60g healthy fats for hormone regulation, under 40g sugar, and under 20g saturated fat.',
+    ],
+  },
+  {
+    number: '03',
+    title: 'Recovery & Sleep',
+    role: 'The Growth Phase',
+    summary:
+      'Muscles do not grow inside the gym — they repair and remodel while you are resting and sleeping.',
+    keyPoints: [
+      'Quality Sleep: Aim for 7–9 hours per night. Sleep deprivation spikes cortisol (promoting fat storage and muscle breakdown) and suppresses growth hormone.',
+      'Scheduled Rest Days: Wednesday and weekend active recovery let your central nervous system, tendons, and left ankle stabilizers rebuild.',
+    ],
+  },
+  {
+    number: '04',
+    title: 'Cardiovascular Health & NEAT',
+    role: 'The Fat-Loss Accelerator',
+    summary:
+      'Cardio is a tool to improve heart health and daily energy expenditure — never a punishment for eating.',
+    keyPoints: [
+      'NEAT (Non-Exercise Activity Thermogenesis): Walking, taking stairs, and daily movement drive a massive share of calorie burn. Target 8,000–10,000 steps/day.',
+      'Ankle-Safe LISS over High-Impact HIIT: Prioritize Incline Treadmill Walking, Stationary Bike, or Elliptical. Limit intense HIIT to 1–2x/week max.',
+    ],
+  },
+];
+
+export const WEEKLY_SPLIT_OVERVIEW = [
+  { day: 'Monday', session: 'Upper Body A', type: 'Push/Pull Strength', isRest: false, workoutId: 'upper_a' as const },
+  { day: 'Tuesday', session: 'Lower Body A', type: 'Ankle-Friendly Glute & Posterior', isRest: false, workoutId: 'lower_a' as const },
+  { day: 'Wednesday', session: 'Rest / Light Walking', type: 'NEAT & Recovery (8k–10k Steps)', isRest: true },
+  { day: 'Thursday', session: 'Upper Body B', type: 'Hypertrophy Focus', isRest: false, workoutId: 'upper_b' as const },
+  { day: 'Friday', session: 'Lower Body B', type: 'Ankle-Friendly Quad & Stability', isRest: false, workoutId: 'lower_b' as const },
+  { day: 'Saturday', session: 'Strength with Tracy / Active Recovery', type: '1x/wk Coach Session or LISS', isRest: false, workoutId: 'tracy_session' as const },
+  { day: 'Sunday', session: 'Complete Rest & Meal Prep', type: '7–9h Sleep & Weekly Reset', isRest: true },
+];
+
+export const ANKLE_WARMUP_PROTOCOL = [
+  {
+    id: 'ankle_circles',
+    title: 'Ankle Circles',
+    prescription: '10 clockwise + 10 counter-clockwise rotations',
+    detail: 'Controlled unloaded joint mobilization for the left ankle before any lower-body loading.',
+  },
+  {
+    id: 'wall_stretch',
+    title: 'Calf / Achilles Wall Stretch',
+    prescription: 'Hold for 30 seconds per side',
+    detail: 'Gently lengthen the gastrocnemius and soleus. Never force into sharp pain or pinch.',
+    hasTimer: true,
+    durationSeconds: 30,
+  },
+  {
+    id: 'band_resisted',
+    title: 'Band Resisted Eversion / Inversion',
+    prescription: '12–15 light rubber band pulls each direction',
+    detail: 'Wakes up the peroneals and tibialis posterior stabilizer muscles protecting the lateral and medial ankle.',
+  },
+];
+
+export const ANKLE_SAFETY_RULES = [
+  {
+    title: 'Ditch High-Impact Cardio',
+    detail: 'Avoid treadmill running, jump rope, or plyometrics (box jumps). Use Incline Treadmill Walk, Stationary Bike, or Elliptical.',
+  },
+  {
+    title: 'Flat-Soled Footwear Only',
+    detail: 'Wear Vans, Converse, or dedicated weightlifting/barefoot-style shoes on leg days instead of soft squishy running shoes for ground stability.',
+  },
+  {
+    title: 'Controlled Eccentrics & Static Footing',
+    detail: 'Keep heels flat on Leg Press and RDLs; avoid over-stretching at the bottom of Seated Calf Raises if the left ankle feels stiff.',
+  },
+];
+
+export const WORKOUT_PLANS: WorkoutDayPlan[] = [
+  {
+    id: 'upper_a',
+    dayLabel: 'Monday · Upper Body A',
+    title: 'Upper Body A — Push / Pull Strength',
+    subtitle: 'Focus on controlled execution and steady progressive overload.',
+    ankleProtected: false,
+    focusSummary: 'Compound chest, back, and shoulder strength paired with isolated arm finishers.',
+    exercises: [
+      {
+        id: 'ua_1',
+        order: 1,
+        name: 'Barbell or Dumbbell Bench Press',
+        sets: 3,
+        reps: '6–8 reps',
+        tip: 'Drive feet firmly into the floor; lower with a controlled 2-second eccentric.',
+        defaultWeightLbs: 95,
+      },
+      {
+        id: 'ua_2',
+        order: 2,
+        name: 'Lat Pulldown or Assisted Pull-Ups',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Lead with elbows down toward your hips; avoid leaning excessively backward.',
+        defaultWeightLbs: 100,
+      },
+      {
+        id: 'ua_3',
+        order: 3,
+        name: 'Seated Dumbbell Shoulder Press',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Seated bench support eliminates lower-body and ankle balance strain.',
+        defaultWeightLbs: 30,
+      },
+      {
+        id: 'ua_4',
+        order: 4,
+        name: 'Seated Cable Rows',
+        sets: 3,
+        reps: '10–12 reps',
+        tip: 'Squeeze shoulder blades together for 1 full second at peak contraction.',
+        defaultWeightLbs: 90,
+      },
+      {
+        id: 'ua_5',
+        order: 5,
+        name: 'Incline Dumbbell Bicep Curls',
+        sets: 2,
+        reps: '12–15 reps',
+        tip: 'Keep elbows pinned behind your torso to stretch the long head of the bicep.',
+        defaultWeightLbs: 20,
+      },
+      {
+        id: 'ua_6',
+        order: 6,
+        name: 'Rope Tricep Pushdowns',
+        sets: 2,
+        reps: '12–15 reps',
+        tip: 'Spread the rope ends apart at the bottom while locking out the elbows.',
+        defaultWeightLbs: 40,
+      },
+    ],
+  },
+  {
+    id: 'lower_a',
+    dayLabel: 'Tuesday · Lower Body A (Ankle-Friendly)',
+    title: 'Lower Body A — Glute & Posterior Chain Focus',
+    subtitle: 'Designed to minimize explosive ankle stress while maximizing leg muscle development.',
+    ankleProtected: true,
+    focusSummary: 'Static foot placement and machine-isolated tension to build glutes, hamstrings, and quads safely.',
+    exercises: [
+      {
+        id: 'la_1',
+        order: 1,
+        name: 'Leg Press (Medium Foot Placement)',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Keep heels firmly flat on the sled to avoid ankle shearing forces.',
+        defaultWeightLbs: 180,
+      },
+      {
+        id: 'la_2',
+        order: 2,
+        name: 'Romanian Deadlifts (RDLs) with Dumbbells or Barbell',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Keeps feet static; targets hamstrings and glutes without dorsiflexion pressure.',
+        defaultWeightLbs: 115,
+      },
+      {
+        id: 'la_3',
+        order: 3,
+        name: 'Seated Leg Extensions',
+        sets: 3,
+        reps: '12–15 reps',
+        tip: 'Isolated quad build without ankle load; pause 1 second at the top.',
+        defaultWeightLbs: 85,
+      },
+      {
+        id: 'la_4',
+        order: 4,
+        name: 'Lying or Seated Leg Curls',
+        sets: 3,
+        reps: '12–15 reps',
+        tip: 'Keep hips pressed into the pad and control the eccentric return.',
+        defaultWeightLbs: 75,
+      },
+      {
+        id: 'la_5',
+        order: 5,
+        name: 'Seated Calf Raises',
+        sets: 2,
+        reps: '12–15 reps',
+        tip: 'Perform slowly with light weight. Do not over-stretch at the bottom if your left ankle feels stiff.',
+        defaultWeightLbs: 45,
+      },
+    ],
+  },
+  {
+    id: 'upper_b',
+    dayLabel: 'Thursday · Upper Body B',
+    title: 'Upper Body B — Hypertrophy Focus',
+    subtitle: 'Higher rep ranges for muscle hypertrophy, metabolic pump, and shoulder posture.',
+    ankleProtected: false,
+    focusSummary: 'Upper-chest, single-arm back symmetry, medial/rear deltoids, and arm volume.',
+    exercises: [
+      {
+        id: 'ub_1',
+        order: 1,
+        name: 'Incline Dumbbell Press',
+        sets: 3,
+        reps: '10–12 reps',
+        tip: 'Set bench to 30 degrees to isolate the clavicular upper chest without shoulder impingement.',
+        defaultWeightLbs: 40,
+      },
+      {
+        id: 'ub_2',
+        order: 2,
+        name: 'Single-Arm Dumbbell Rows',
+        sets: 3,
+        reps: '10–12 reps',
+        tip: 'Brace knee and hand on bench for stable spinal and lower-body support.',
+        defaultWeightLbs: 45,
+      },
+      {
+        id: 'ub_3',
+        order: 3,
+        name: 'Dumbbell Lateral Raises (Side Delts)',
+        sets: 3,
+        reps: '12–15 reps',
+        tip: 'Raise with a slight forward plane and soft elbows up to shoulder height.',
+        defaultWeightLbs: 15,
+      },
+      {
+        id: 'ub_4',
+        order: 4,
+        name: 'Face Pulls (Cable)',
+        sets: 3,
+        reps: '15 reps',
+        tip: 'Great for posture and shoulder health — pull rope toward forehead with external rotation.',
+        defaultWeightLbs: 35,
+      },
+      {
+        id: 'ub_5',
+        order: 5,
+        name: 'Hammer Curls',
+        sets: 2,
+        reps: '12–15 reps',
+        tip: 'Neutral palms-facing grip targets the brachialis and forearm stabilizers.',
+        defaultWeightLbs: 22.5,
+      },
+      {
+        id: 'ub_6',
+        order: 6,
+        name: 'Overhead Dumbbell Tricep Extension',
+        sets: 2,
+        reps: '12–15 reps',
+        tip: 'Perform seated to emphasize the long head of the triceps under full stretch.',
+        defaultWeightLbs: 35,
+      },
+    ],
+  },
+  {
+    id: 'lower_b',
+    dayLabel: 'Friday · Lower Body B (Ankle-Friendly)',
+    title: 'Lower Body B — Quad & Stability Focus',
+    subtitle: 'Stabilizer-focused session without high-impact landing.',
+    ankleProtected: true,
+    focusSummary: 'Depth-controlled box/hack squats, hip thrusts, single-leg stability with ankle swap, and tibialis control.',
+    exercises: [
+      {
+        id: 'lb_1',
+        order: 1,
+        name: 'Goblet Box Squats or Hack Squat Machine',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Squatting to a box limits deep ankle flexion while allowing heavy quad activation.',
+        defaultWeightLbs: 65,
+      },
+      {
+        id: 'lb_2',
+        order: 2,
+        name: 'Glute Bridges or Barbell Hip Thrusts',
+        sets: 3,
+        reps: '10–12 reps',
+        tip: 'Shins stay vertical at top lockout — zero forward knee travel over the left ankle.',
+        defaultWeightLbs: 135,
+      },
+      {
+        id: 'lb_3',
+        order: 3,
+        name: 'Walking Lunges or Step-Ups (Low Step Height)',
+        sets: 2,
+        reps: '10 reps per leg',
+        tip: 'Step onto a low box or keep forward shin vertical.',
+        ankleSwapOption: {
+          swapName: 'Bulgarian Split Squats (Rear-Supported Foot)',
+          swapReps: '10 reps per leg',
+          swapReason: 'Left Ankle Mod: Eliminates dynamic forward stepping impact while keeping front foot planted.',
+        },
+        defaultWeightLbs: 25,
+      },
+      {
+        id: 'lb_4',
+        order: 4,
+        name: 'Standing Machine Calf Raise or Tibialis Raises',
+        sets: 2,
+        reps: '12–15 reps',
+        tip: 'Keep movements slow and controlled; prioritize anterior tibialis strength for ankle shielding.',
+        defaultWeightLbs: 50,
+      },
+    ],
+  },
+  {
+    id: 'tracy_session',
+    dayLabel: 'Weekly Key · Coaching Session',
+    title: 'Strength Train with Tracy (1x / Week)',
+    subtitle: 'Coached progressive resistance session paired with 2+ programmed workouts for weekly Key to Success.',
+    ankleProtected: true,
+    focusSummary: 'Guided compound strength progression, form verification, and left-ankle stability check-in.',
+    exercises: [
+      {
+        id: 'tr_1',
+        order: 1,
+        name: 'Coached Primary Compound Lift (Squat / Hinge Variation)',
+        sets: 4,
+        reps: '6–8 reps',
+        tip: 'Flat-soled footwear verified; controlled tempo under Tracy’s cueing.',
+        defaultWeightLbs: 125,
+      },
+      {
+        id: 'tr_2',
+        order: 2,
+        name: 'Coached Upper Body Push / Pull Superset',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Focus on scapular control and progressive load increase.',
+        defaultWeightLbs: 65,
+      },
+      {
+        id: 'tr_3',
+        order: 3,
+        name: 'Core & Left-Ankle Proprioception Finisher',
+        sets: 3,
+        reps: '12 reps',
+        tip: 'Controlled anti-rotation core work + static single-leg balance.',
+        defaultWeightLbs: 25,
+      },
+    ],
+  },
+];
+
+export const APPROVED_FOOD_CATALOG: ApprovedFoodItem[] = [
+  // LEAN PROTEINS
+  {
+    id: 'fp_ground_turkey',
+    name: 'Lean Ground Turkey (93/7 or 99%)',
+    category: 'protein',
+    subGroup: 'Whole Lean Proteins',
+    servingNote: '5 oz cooked (140g)',
+    calories: 210,
+    protein: 31,
+    carbs: 0,
+    fats: 9,
+    sugar: 0,
+    saturatedFat: 2.5,
+  },
+  {
+    id: 'fp_ground_beef_93',
+    name: '93% Lean Ground Beef',
+    category: 'protein',
+    subGroup: 'Whole Lean Proteins (Approved Update)',
+    servingNote: '5 oz cooked (140g)',
+    calories: 230,
+    protein: 30,
+    carbs: 0,
+    fats: 11,
+    sugar: 0,
+    saturatedFat: 4.5,
+  },
+  {
+    id: 'fp_fish',
+    name: 'White Fish / Wild Cod / Tilapia',
+    category: 'protein',
+    subGroup: 'Whole Lean Proteins',
+    servingNote: '6 oz fillet (170g)',
+    calories: 175,
+    protein: 36,
+    carbs: 0,
+    fats: 2.5,
+    sugar: 0,
+    saturatedFat: 0.5,
+  },
+  {
+    id: 'fp_eggs_ratio',
+    name: 'Eggs (1 Whole Yolk + 3 Egg Whites)',
+    category: 'protein',
+    subGroup: 'Whole Lean Proteins (1:2–3 Ratio)',
+    servingNote: '1 large egg + 3 whites',
+    calories: 125,
+    protein: 17,
+    carbs: 1,
+    fats: 5,
+    sugar: 0,
+    saturatedFat: 1.6,
+  },
+  {
+    id: 'fp_chicken',
+    name: 'Grilled Chicken Breast',
+    category: 'protein',
+    subGroup: 'Whole Lean Proteins',
+    servingNote: '5 oz cooked (140g)',
+    calories: 220,
+    protein: 42,
+    carbs: 0,
+    fats: 4.5,
+    sugar: 0,
+    saturatedFat: 1.2,
+  },
+  {
+    id: 'fp_two_good',
+    name: 'Two Good Greek Yogurt',
+    category: 'protein',
+    subGroup: 'Greek Yogurt (Gluten-Free)',
+    servingNote: '1 cup (150g)',
+    calories: 80,
+    protein: 12,
+    carbs: 3,
+    fats: 2,
+    sugar: 2,
+    saturatedFat: 1,
+    glutenFreeNote: true,
+  },
+  {
+    id: 'fp_oikos_triple_zero',
+    name: 'Oikos Triple Zero Greek Yogurt',
+    category: 'protein',
+    subGroup: 'Greek Yogurt (Gluten-Free)',
+    servingNote: '1 cup (150g)',
+    calories: 90,
+    protein: 15,
+    carbs: 7,
+    fats: 0,
+    sugar: 0,
+    saturatedFat: 0,
+    glutenFreeNote: true,
+  },
+  {
+    id: 'fp_cottage_cheese',
+    name: 'Fat Free Cottage Cheese',
+    category: 'protein',
+    subGroup: 'Dairy Protein',
+    servingNote: '1 cup (226g)',
+    calories: 160,
+    protein: 26,
+    carbs: 12,
+    fats: 0,
+    sugar: 8,
+    saturatedFat: 0,
+  },
+  {
+    id: 'fp_think_bar',
+    name: 'think! High Protein Bar',
+    category: 'protein',
+    subGroup: 'Protein Bars (Super Low Sugar)',
+    servingNote: '1 bar (60g)',
+    calories: 230,
+    protein: 20,
+    carbs: 23,
+    fats: 8,
+    sugar: 0,
+    saturatedFat: 3,
+  },
+  {
+    id: 'fp_pure_protein_bar',
+    name: 'Pure Protein Bar',
+    category: 'protein',
+    subGroup: 'Protein Bars (Super Low Sugar)',
+    servingNote: '1 bar (50g)',
+    calories: 190,
+    protein: 20,
+    carbs: 17,
+    fats: 4.5,
+    sugar: 2,
+    saturatedFat: 2.5,
+  },
+  {
+    id: 'fp_dymatize',
+    name: 'Dymatize ISO100 Protein Shake',
+    category: 'protein',
+    subGroup: 'Protein Powder / Shakes (Super Low Sugar)',
+    servingNote: '1 scoop (32g)',
+    calories: 120,
+    protein: 25,
+    carbs: 2,
+    fats: 0.5,
+    sugar: 1,
+    saturatedFat: 0,
+    supportsPb2Addon: true,
+  },
+  {
+    id: 'fp_premier_protein',
+    name: 'Premier Protein Shake',
+    category: 'protein',
+    subGroup: 'Protein Powder / Shakes (Super Low Sugar)',
+    servingNote: '1 shake (11 fl oz)',
+    calories: 160,
+    protein: 30,
+    carbs: 5,
+    fats: 3,
+    sugar: 1,
+    saturatedFat: 1,
+    supportsPb2Addon: true,
+  },
+  {
+    id: 'fp_muscle_milk',
+    name: 'Muscle Milk Zero / Pro Shake',
+    category: 'protein',
+    subGroup: 'Protein Powder / Shakes (Super Low Sugar)',
+    servingNote: '1 shake (11 fl oz)',
+    calories: 160,
+    protein: 25,
+    carbs: 7,
+    fats: 4,
+    sugar: 0,
+    saturatedFat: 1,
+    supportsPb2Addon: true,
+  },
+
+  // CARB OPTIONS
+  {
+    id: 'fc_brown_rice',
+    name: 'Steamed Rice (Brown Preferred / White Okay)',
+    category: 'carb',
+    subGroup: 'Primary Complex Carbs',
+    servingNote: '1 cup cooked (195g)',
+    calories: 218,
+    protein: 4.5,
+    carbs: 45,
+    fats: 1.6,
+    sugar: 0.5,
+    saturatedFat: 0.3,
+    variants: ['Brown Rice (Preferred)', 'White Jasmine Rice'],
+  },
+  {
+    id: 'fc_sweet_potato',
+    name: 'Baked Sweet Potato',
+    category: 'carb',
+    subGroup: 'Primary Complex Carbs',
+    servingNote: '200g cooked',
+    calories: 180,
+    protein: 4,
+    carbs: 41,
+    fats: 0.3,
+    sugar: 11,
+    saturatedFat: 0,
+  },
+  {
+    id: 'fc_petit_potatoes',
+    name: 'Private Selection Petit Potatoes',
+    category: 'carb',
+    subGroup: 'Gourmet Potato Options',
+    servingNote: '200g roasted',
+    calories: 155,
+    protein: 4,
+    carbs: 35,
+    fats: 0.2,
+    sugar: 2,
+    saturatedFat: 0,
+    variants: ['Purple Gourmet', 'Red Gourmet', 'Medley Gourmet', 'Gold Gourmet'],
+  },
+  {
+    id: 'fc_quinoa',
+    name: 'Cooked Quinoa',
+    category: 'carb',
+    subGroup: 'Primary Complex Carbs',
+    servingNote: '1 cup cooked (185g)',
+    calories: 222,
+    protein: 8,
+    carbs: 39,
+    fats: 3.5,
+    sugar: 1.5,
+    saturatedFat: 0.4,
+  },
+  {
+    id: 'fc_oatmeal',
+    name: 'Rolled Oatmeal',
+    category: 'carb',
+    subGroup: 'Primary Complex Carbs',
+    servingNote: '1/2 cup dry (40g)',
+    calories: 150,
+    protein: 5,
+    carbs: 27,
+    fats: 2.5,
+    sugar: 1,
+    saturatedFat: 0.5,
+  },
+  {
+    id: 'fc_rice_cakes',
+    name: 'Rice Cakes (Sweet & Savory Fun Flavors)',
+    category: 'carb',
+    subGroup: 'Snacky Snacks',
+    servingNote: '2 cakes (Caramel / White Cheddar / Apple Cinnamon)',
+    calories: 100,
+    protein: 2,
+    carbs: 22,
+    fats: 0.5,
+    sugar: 4,
+    saturatedFat: 0,
+    variants: ['White Cheddar Savory', 'Caramel Corn Sweet', 'Apple Cinnamon', 'Lightly Salted'],
+  },
+  {
+    id: 'fc_pop_chips',
+    name: 'Popchips Single Bag',
+    category: 'carb',
+    subGroup: 'Snacky Snacks',
+    servingNote: '1 bag (23g)',
+    calories: 100,
+    protein: 1,
+    carbs: 17,
+    fats: 3,
+    sugar: 1,
+    saturatedFat: 0.3,
+  },
+  {
+    id: 'fc_hummus',
+    name: 'Classic Hummus Dip',
+    category: 'carb',
+    subGroup: 'Snacky Snacks',
+    servingNote: '2 tbsp (30g)',
+    calories: 70,
+    protein: 2,
+    carbs: 5,
+    fats: 4.5,
+    sugar: 0.5,
+    saturatedFat: 0.6,
+  },
+
+  // FAT OPTIONS
+  {
+    id: 'ff_nut_butter',
+    name: 'Almond / Peanut Butter or Raw Mixed Nuts',
+    category: 'fat',
+    subGroup: 'Healthy Hormone-Supporting Fats',
+    servingNote: '1 tbsp / 18g',
+    calories: 105,
+    protein: 4,
+    carbs: 3.5,
+    fats: 9,
+    sugar: 1,
+    saturatedFat: 1.2,
+  },
+  {
+    id: 'ff_coconut_oil',
+    name: 'Virgin Coconut Oil (Cooking / Prep)',
+    category: 'fat',
+    subGroup: 'Healthy Hormone-Supporting Fats',
+    servingNote: '1 tsp (4.5g)',
+    calories: 40,
+    protein: 0,
+    carbs: 0,
+    fats: 4.5,
+    sugar: 0,
+    saturatedFat: 3.8,
+  },
+  {
+    id: 'ff_chia_seeds',
+    name: 'Organic Chia Seeds',
+    category: 'fat',
+    subGroup: 'Healthy Hormone-Supporting Fats',
+    servingNote: '1 tbsp (12g)',
+    calories: 60,
+    protein: 2,
+    carbs: 5,
+    fats: 4,
+    sugar: 0,
+    saturatedFat: 0.4,
+  },
+
+  // SWEET SNACKY SNACKS
+  {
+    id: 'fs_atkins_pb_cups',
+    name: 'Atkins Endulge Peanut Butter Cups',
+    category: 'sweet',
+    subGroup: 'Sweet Snacky Snacks (ANY Atkins Dessert)',
+    servingNote: '1 pack (34g)',
+    calories: 160,
+    protein: 3,
+    carbs: 15,
+    fats: 13,
+    sugar: 1,
+    saturatedFat: 6,
+  },
+  {
+    id: 'fs_atkins_nut_roll',
+    name: 'Atkins Caramel Chocolate Nut Roll',
+    category: 'sweet',
+    subGroup: 'Sweet Snacky Snacks (ANY Atkins Dessert)',
+    servingNote: '1 bar (44g)',
+    calories: 190,
+    protein: 7,
+    carbs: 18,
+    fats: 12,
+    sugar: 2,
+    saturatedFat: 5,
+  },
+];
+
+export const INITIAL_FOOD_LOGS: FoodLogEntry[] = [];
+
+export const INITIAL_MEASUREMENT_LOGS: BodyMeasurementEntry[] = [];
+
+export const INITIAL_WEEKLY_CONSISTENCY: WeeklyConsistencyState = {
+  tracySessionCompleted: false,
+  programmedWorkoutsCompleted: 0,
+  macroDaysTrackedAndHit: 0,
+  cheatMode: 'two_meals',
+  cheatUsedCount: 0,
+};
+
