@@ -1,20 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import {
   WORKOUT_PLANS,
-  WEEKLY_SPLIT_OVERVIEW,
   ANKLE_WARMUP_PROTOCOL,
   ANKLE_SAFETY_RULES,
+  createCustomWorkoutPlan,
+  resolveWeeklySchedule,
   type WorkoutDayPlan,
+  type SetLogEntry,
 } from '../data/programData';
-import { Check, Timer, RotateCcw, ArrowLeftRight, ShieldAlert, Footprints } from 'lucide-react';
-
-export interface SetLogState {
-  weightLbs: number;
-  repsCompleted: string;
-  completed: boolean;
-}
+import {
+  Check,
+  Timer,
+  RotateCcw,
+  ArrowLeftRight,
+  ShieldAlert,
+  Footprints,
+  Plus,
+  Trash2,
+  X,
+} from 'lucide-react';
 
 interface WorkoutsViewProps {
+  activeWorkoutId: WorkoutDayPlan['id'];
+  onSelectWorkoutId: (workoutId: WorkoutDayPlan['id']) => void;
+  customWorkouts: WorkoutDayPlan[];
+  onAddCustomWorkout: (workout: WorkoutDayPlan, scheduleDay?: string) => void;
+  onDeleteCustomWorkout: (workoutId: string) => void;
+  scheduleOverrides: Record<string, string>;
+  onUpdateScheduleDay: (day: string, workoutOrRestId: string) => void;
+  onResetScheduleOverrides: () => void;
+  setLogs: Record<string, SetLogEntry>;
+  onUpdateSetLogs: React.Dispatch<React.SetStateAction<Record<string, SetLogEntry>>>;
   completedSessionsThisWeek: string[];
   onCompleteSession: (workoutId: WorkoutDayPlan['id']) => void;
   ankleWarmupChecks: Record<string, boolean>;
@@ -26,10 +42,27 @@ interface WorkoutsViewProps {
   lissMinutesToday: number;
   lissModality: string;
   onUpdateLiss: (modality: string, minutes: number) => void;
-  lastActiveDate: string;
+}
+
+interface DraftExerciseRow {
+  name: string;
+  sets: string;
+  reps: string;
+  weightLbs: string;
+  tip: string;
 }
 
 export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
+  activeWorkoutId,
+  onSelectWorkoutId,
+  customWorkouts,
+  onAddCustomWorkout,
+  onDeleteCustomWorkout,
+  scheduleOverrides,
+  onUpdateScheduleDay,
+  onResetScheduleOverrides,
+  setLogs,
+  onUpdateSetLogs,
   completedSessionsThisWeek,
   onCompleteSession,
   ankleWarmupChecks,
@@ -41,37 +74,21 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
   lissMinutesToday,
   lissModality,
   onUpdateLiss,
-  lastActiveDate,
 }) => {
-  const [activeWorkoutId, setActiveWorkoutId] = useState<WorkoutDayPlan['id']>('upper_a');
   const [stretchSecondsLeft, setStretchSecondsLeft] = useState<number>(30);
   const [stretchTimerRunning, setStretchTimerRunning] = useState<boolean>(false);
 
-  const [setLogs, setSetLogs] = useState<Record<string, SetLogState>>(() => {
-    const initial: Record<string, SetLogState> = {};
-    for (const plan of WORKOUT_PLANS) {
-      for (const ex of plan.exercises) {
-        for (let s = 1; s <= ex.sets; s++) {
-          initial[`${ex.id}_set_${s}`] = {
-            weightLbs: ex.defaultWeightLbs,
-            repsCompleted: ex.reps.replace(' reps', ''),
-            completed: false,
-          };
-        }
-      }
-    }
-    return initial;
-  });
-
-  useEffect(() => {
-    setSetLogs((prev) => {
-      const next: Record<string, SetLogState> = {};
-      for (const [k, v] of Object.entries(prev)) {
-        next[k] = { ...v, completed: false };
-      }
-      return next;
-    });
-  }, [lastActiveDate]);
+  // Custom Workout Builder State
+  const [showBuilder, setShowBuilder] = useState<boolean>(false);
+  const [customTitle, setCustomTitle] = useState<string>('');
+  const [customSubtitle, setCustomSubtitle] = useState<string>('');
+  const [customAssignDay, setCustomAssignDay] = useState<string>('');
+  const [customAnkleProtected, setCustomAnkleProtected] = useState<boolean>(false);
+  const [builderError, setBuilderError] = useState<string>('');
+  const [draftExercises, setDraftExercises] = useState<DraftExerciseRow[]>([
+    { name: '', sets: '3', reps: '10–12 reps', weightLbs: '25', tip: '' },
+    { name: '', sets: '3', reps: '12–15 reps', weightLbs: '20', tip: '' },
+  ]);
 
   useEffect(() => {
     if (!stretchTimerRunning) return;
@@ -90,21 +107,39 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
     return () => window.clearInterval(interval);
   }, [stretchTimerRunning, ankleWarmupChecks, onToggleAnkleWarmup]);
 
+  const allWorkoutPlans = [...WORKOUT_PLANS, ...customWorkouts];
+  const resolvedSchedule = resolveWeeklySchedule(customWorkouts, scheduleOverrides);
+  const hasScheduleOverrides = Object.keys(scheduleOverrides).length > 0;
+
   const activeWorkout =
-    WORKOUT_PLANS.find((w) => w.id === activeWorkoutId) || WORKOUT_PLANS[0];
+    allWorkoutPlans.find((w) => w.id === activeWorkoutId) || allWorkoutPlans[0];
 
   const handleToggleSet = (key: string) => {
-    setSetLogs((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        completed: !prev[key]?.completed,
-      },
-    }));
+    onUpdateSetLogs((prev) => {
+      const next = {
+        ...prev,
+        [key]: {
+          ...prev[key],
+          completed: !prev[key]?.completed,
+        },
+      };
+
+      const allSetsDone = activeWorkout.exercises.every((ex) => {
+        for (let s = 1; s <= ex.sets; s++) {
+          if (!next[`${ex.id}_set_${s}`]?.completed) return false;
+        }
+        return true;
+      });
+      if (allSetsDone && !completedSessionsThisWeek.includes(activeWorkout.id)) {
+        setTimeout(() => onCompleteSession(activeWorkout.id), 0);
+      }
+
+      return next;
+    });
   };
 
   const handleWeightChange = (key: string, weightLbs: number) => {
-    setSetLogs((prev) => ({
+    onUpdateSetLogs((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
@@ -114,13 +149,72 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
   };
 
   const handleRepsChange = (key: string, repsCompleted: string) => {
-    setSetLogs((prev) => ({
+    onUpdateSetLogs((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
         repsCompleted,
       },
     }));
+  };
+
+  const handleUpdateDraftExercise = (
+    index: number,
+    field: keyof DraftExerciseRow,
+    value: string
+  ) => {
+    setDraftExercises((prev) =>
+      prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
+    );
+  };
+
+  const handleAddDraftRow = () => {
+    setDraftExercises((prev) => [
+      ...prev,
+      { name: '', sets: '3', reps: '10–12 reps', weightLbs: '20', tip: '' },
+    ]);
+  };
+
+  const handleRemoveDraftRow = (index: number) => {
+    setDraftExercises((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
+  };
+
+  const handleCreateCustomSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customTitle.trim()) {
+      setBuilderError('Please give your custom workout a name.');
+      return;
+    }
+    const validExercises = draftExercises.filter((ex) => ex.name.trim() !== '');
+    if (validExercises.length === 0) {
+      setBuilderError('Please add at least one exercise with a name.');
+      return;
+    }
+
+    setBuilderError('');
+    const newPlan = createCustomWorkoutPlan({
+      title: customTitle,
+      subtitle: customSubtitle || 'Custom saved workout session.',
+      ankleProtected: customAnkleProtected,
+      exercises: validExercises.map((ex) => ({
+        name: ex.name,
+        sets: parseInt(ex.sets, 10) || 3,
+        reps: ex.reps || '10–12 reps',
+        defaultWeightLbs: parseFloat(ex.weightLbs) || 0,
+        tip: ex.tip,
+      })),
+    });
+
+    onAddCustomWorkout(newPlan, customAssignDay || undefined);
+    setCustomTitle('');
+    setCustomSubtitle('');
+    setCustomAssignDay('');
+    setCustomAnkleProtected(false);
+    setDraftExercises([
+      { name: '', sets: '3', reps: '10–12 reps', weightLbs: '25', tip: '' },
+      { name: '', sets: '3', reps: '12–15 reps', weightLbs: '20', tip: '' },
+    ]);
+    setShowBuilder(false);
   };
 
   const warmupCompletedCount = Object.values(ankleWarmupChecks).filter(Boolean).length;
@@ -137,27 +231,229 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Compact, Bubbly Weekly Schedule Strip */}
-      <section aria-labelledby="split-schedule-heading" className="bg-white border border-teal-200/80 rounded-3xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-pink-100">
-          <h2 id="split-schedule-heading" className="text-lg font-bold text-slate-900">
-            Weekly Split Schedule
-          </h2>
-          <span className="text-xs text-pink-600 font-semibold">
-            Goal: 1x Full-Body + 2–4 Split Days
-          </span>
+      {/* Compact, Bubbly Weekly Schedule Strip with Per-Day Workout Scheduling */}
+      <section aria-labelledby="split-schedule-heading" className="bg-white border border-teal-200/80 rounded-3xl p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-pink-100">
+          <div>
+            <h2 id="split-schedule-heading" className="text-lg font-bold text-slate-900">
+              Weekly Split Schedule
+            </h2>
+            <p className="text-xs text-slate-500">
+              Goal: 1x Full-Body + 2–4 Split Days · Use the dropdown on any day to schedule a saved workout!
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {hasScheduleOverrides && (
+              <button
+                type="button"
+                onClick={onResetScheduleOverrides}
+                className="px-3 py-2 rounded-2xl border border-teal-200 bg-teal-50/60 hover:bg-teal-100 text-xs font-bold text-teal-800 whitespace-nowrap"
+              >
+                Reset Schedule
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowBuilder((prev) => !prev)}
+              className="px-4 py-2 rounded-2xl bg-gradient-to-r from-teal-500 to-pink-500 hover:opacity-95 text-white text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shadow-xs"
+            >
+              {showBuilder ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+              {showBuilder ? 'Close Builder' : 'New Custom Workout'}
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 mt-4">
-          {WEEKLY_SPLIT_OVERVIEW.map((item) => {
+        {/* Collapsible Custom Workout Builder */}
+        {showBuilder && (
+          <form
+            onSubmit={handleCreateCustomSubmit}
+            className="p-5 rounded-3xl bg-gradient-to-br from-teal-50/70 via-white to-pink-50/70 border border-pink-200 space-y-4"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <span className="text-xs font-bold text-pink-600">Saved Forever in Your Library</span>
+                <h3 className="text-base font-bold text-slate-900">Create Custom Workout</h3>
+              </div>
+            </div>
+
+            {builderError && (
+              <p role="alert" className="text-xs font-semibold text-red-600">
+                {builderError}
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label className="block text-xs text-slate-600 font-medium">
+                Workout Name
+                <input
+                  type="text"
+                  value={customTitle}
+                  onChange={(e) => setCustomTitle(e.target.value)}
+                  placeholder="e.g., Glute & Core Sculpt"
+                  aria-label="Custom workout name"
+                  className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                />
+              </label>
+
+              <label className="block text-xs text-slate-600 font-medium">
+                Focus / Notes
+                <input
+                  type="text"
+                  value={customSubtitle}
+                  onChange={(e) => setCustomSubtitle(e.target.value)}
+                  placeholder="e.g., Booty bands, kickbacks & abs"
+                  aria-label="Custom workout focus"
+                  className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                />
+              </label>
+
+              <label className="block text-xs text-slate-600 font-medium">
+                Schedule on Day (Optional)
+                <select
+                  value={customAssignDay}
+                  onChange={(e) => setCustomAssignDay(e.target.value)}
+                  aria-label="Schedule custom workout on day"
+                  className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                >
+                  <option value="">Save to Library (Any Day)</option>
+                  <option value="Mon">Monday</option>
+                  <option value="Tue">Tuesday</option>
+                  <option value="Wed">Wednesday</option>
+                  <option value="Thu">Thursday</option>
+                  <option value="Fri">Friday</option>
+                  <option value="Sat">Saturday</option>
+                  <option value="Sun">Sunday</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="inline-flex items-center gap-2 text-xs font-semibold text-teal-800 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={customAnkleProtected}
+                onChange={(e) => setCustomAnkleProtected(e.target.checked)}
+                className="rounded border-teal-300 text-teal-600"
+              />
+              <span>Lower-Body / Ankle-Friendly Session</span>
+            </label>
+
+            {/* Exercise Rows */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">Exercises</span>
+                <button
+                  type="button"
+                  onClick={handleAddDraftRow}
+                  className="px-3 py-1 rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-900 text-xs font-bold flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Exercise
+                </button>
+              </div>
+
+              {draftExercises.map((row, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-2xl bg-white border border-teal-200/80 grid grid-cols-1 sm:grid-cols-12 gap-2 items-end"
+                >
+                  <label className="sm:col-span-4 block text-[11px] text-slate-500">
+                    Exercise #{idx + 1} Name
+                    <input
+                      type="text"
+                      value={row.name}
+                      onChange={(e) => handleUpdateDraftExercise(idx, 'name', e.target.value)}
+                      placeholder="e.g., Cable Glute Kickbacks"
+                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs bg-white border border-teal-200 rounded-lg text-slate-900"
+                    />
+                  </label>
+                  <label className="sm:col-span-2 block text-[11px] text-slate-500">
+                    Sets
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={row.sets}
+                      onChange={(e) => handleUpdateDraftExercise(idx, 'sets', e.target.value)}
+                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-teal-200 rounded-lg text-slate-900"
+                    />
+                  </label>
+                  <label className="sm:col-span-2 block text-[11px] text-slate-500">
+                    Reps
+                    <input
+                      type="text"
+                      value={row.reps}
+                      onChange={(e) => handleUpdateDraftExercise(idx, 'reps', e.target.value)}
+                      placeholder="10–12 reps"
+                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-teal-200 rounded-lg text-slate-900"
+                    />
+                  </label>
+                  <label className="sm:col-span-2 block text-[11px] text-slate-500">
+                    Weight (lbs)
+                    <input
+                      type="number"
+                      value={row.weightLbs}
+                      onChange={(e) => handleUpdateDraftExercise(idx, 'weightLbs', e.target.value)}
+                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-teal-200 rounded-lg text-slate-900"
+                    />
+                  </label>
+                  <div className="sm:col-span-2 flex items-center gap-1.5">
+                    <label className="flex-1 block text-[11px] text-slate-500">
+                      Form Tip
+                      <input
+                        type="text"
+                        value={row.tip}
+                        onChange={(e) => handleUpdateDraftExercise(idx, 'tip', e.target.value)}
+                        placeholder="Optional tip"
+                        className="mt-0.5 w-full px-2 py-1.5 text-xs bg-white border border-teal-200 rounded-lg text-slate-900"
+                      />
+                    </label>
+                    {draftExercises.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDraftRow(idx)}
+                        aria-label={`Remove exercise ${idx + 1}`}
+                        className="p-1.5 text-slate-400 hover:text-pink-600 rounded-lg mb-0.5"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowBuilder(false)}
+                className="px-4 py-2 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold shadow-xs"
+              >
+                Save Custom Workout
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+          {resolvedSchedule.map((item) => {
             const isSelectable = Boolean(item.workoutId);
             const isSelected = item.workoutId === activeWorkoutId;
             const isDone = item.workoutId ? completedSessionsThisWeek.includes(item.workoutId) : false;
+            const currentSelectValue =
+              scheduleOverrides[item.day] ||
+              item.workoutId ||
+              (item.day === 'Thu' ? 'rest_walk' : 'rest_recharge');
 
             return (
               <div
                 key={item.day}
-                className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between ${
+                className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between gap-2 ${
                   isSelected
                     ? 'border-pink-400 bg-gradient-to-b from-pink-500 to-pink-600 text-white shadow-xs'
                     : item.isRest
@@ -182,19 +478,59 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   </p>
                 </div>
 
-                {isSelectable && item.workoutId && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveWorkoutId(item.workoutId!)}
-                    className={`mt-2.5 w-full py-1 px-2 rounded-xl text-[11px] font-bold transition-colors whitespace-nowrap shrink-0 ${
+                <div className="space-y-1.5">
+                  <select
+                    aria-label={`Schedule workout for ${item.day}`}
+                    value={currentSelectValue}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      onUpdateScheduleDay(item.day, val);
+                      if (val !== 'rest_walk' && val !== 'rest_recharge') {
+                        onSelectWorkoutId(val);
+                      }
+                    }}
+                    className={`w-full px-2 py-1 rounded-lg text-[10px] font-semibold border cursor-pointer ${
                       isSelected
-                        ? 'bg-white text-pink-600'
-                        : 'bg-teal-50 text-teal-800 hover:bg-pink-100 hover:text-pink-800'
+                        ? 'bg-pink-700/60 border-pink-300 text-white'
+                        : 'bg-teal-50/60 border-teal-200/80 text-slate-700'
                     }`}
                   >
-                    {isSelected ? 'Viewing' : 'Open'}
-                  </button>
-                )}
+                    <optgroup label="Programmed Split">
+                      <option value="upper_a">Upper Body A</option>
+                      <option value="lower_a">Lower Body A</option>
+                      <option value="full_body_session">Full-Body & Core</option>
+                      <option value="upper_b">Upper Body B</option>
+                      <option value="lower_b">Lower Body B</option>
+                    </optgroup>
+                    {customWorkouts.length > 0 && (
+                      <optgroup label="Saved Custom Workouts">
+                        {customWorkouts.map((cw) => (
+                          <option key={cw.id} value={cw.id}>
+                            {cw.title}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    <optgroup label="Rest & Recovery">
+                      <option value="rest_walk">Rest & Walk</option>
+                      <option value="rest_recharge">Rest & Recharge</option>
+                    </optgroup>
+                  </select>
+
+                  {isSelectable && item.workoutId && (
+                    <button
+                      type="button"
+                      onClick={() => onSelectWorkoutId(item.workoutId!)}
+                      className={`w-full py-1 px-2 rounded-xl text-[11px] font-bold transition-colors whitespace-nowrap shrink-0 ${
+                        isSelected
+                          ? 'bg-white text-pink-600'
+                          : 'bg-teal-50 text-teal-800 hover:bg-pink-100 hover:text-pink-800'
+                      }`}
+                    >
+                      {isSelected ? 'Viewing' : 'Open'}
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -205,9 +541,9 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left 8 Columns: Active Workout Session */}
         <div className="lg:col-span-8 bg-white border border-pink-200/80 rounded-3xl p-6 space-y-5">
-          {/* Segmented Session Selector */}
+          {/* Segmented Session Selector (Built-In + Saved Custom Workouts) */}
           <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-teal-50/70 border border-teal-200/60 rounded-2xl" role="tablist" aria-label="Select workout session">
-            {WORKOUT_PLANS.map((plan) => {
+            {allWorkoutPlans.map((plan) => {
               const active = plan.id === activeWorkoutId;
               const completed = completedSessionsThisWeek.includes(plan.id);
               return (
@@ -216,7 +552,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setActiveWorkoutId(plan.id)}
+                  onClick={() => onSelectWorkoutId(plan.id)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
                     active
                       ? 'bg-pink-500 text-white shadow-xs'
@@ -225,9 +561,10 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                 >
                   {plan.id === 'upper_a' && 'Mon · Upper A'}
                   {plan.id === 'lower_a' && 'Tue · Lower A'}
-                  {plan.id === 'upper_b' && 'Thu · Upper B'}
-                  {plan.id === 'lower_b' && 'Fri · Lower B'}
-                  {plan.id === 'full_body_session' && 'Sat · Full-Body'}
+                  {plan.id === 'full_body_session' && 'Wed · Full-Body'}
+                  {plan.id === 'upper_b' && 'Fri · Upper B'}
+                  {plan.id === 'lower_b' && 'Sat · Lower B'}
+                  {plan.isCustom && (plan.shortTabLabel || plan.title)}
                   {completed ? ' (Done)' : ''}
                 </button>
               );
@@ -248,18 +585,31 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               <p className="text-xs text-slate-500 mt-0.5">{activeWorkout.subtitle}</p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => onCompleteSession(activeWorkout.id)}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                isCurrentSessionLogged
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-pink-500 text-white hover:bg-pink-600'
-              }`}
-            >
-              <Check className="w-4 h-4" />
-              {isCurrentSessionLogged ? 'Workout Logged!' : 'Finish Workout'}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {activeWorkout.isCustom && (
+                <button
+                  type="button"
+                  onClick={() => onDeleteCustomWorkout(activeWorkout.id)}
+                  aria-label={`Delete custom workout ${activeWorkout.title}`}
+                  className="px-3 py-2.5 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onCompleteSession(activeWorkout.id)}
+                className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                  isCurrentSessionLogged
+                    ? 'bg-teal-500 text-white'
+                    : 'bg-pink-500 text-white hover:bg-pink-600'
+                }`}
+              >
+                <Check className="w-4 h-4" />
+                {isCurrentSessionLogged ? 'Workout Logged!' : 'Finish Workout'}
+              </button>
+            </div>
           </div>
 
           {/* Exercise List */}

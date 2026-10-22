@@ -16,12 +16,14 @@ export interface ExercisePrescription {
 }
 
 export interface WorkoutDayPlan {
-  id: 'upper_a' | 'lower_a' | 'upper_b' | 'lower_b' | 'full_body_session';
+  id: string;
   dayLabel: string;
+  shortTabLabel?: string;
   title: string;
   subtitle: string;
   ankleProtected: boolean;
   focusSummary: string;
+  isCustom?: boolean;
   exercises: ExercisePrescription[];
 }
 
@@ -90,10 +92,10 @@ export const FOUR_CORE_PILLARS = [
 export const WEEKLY_SPLIT_OVERVIEW = [
   { day: 'Mon', session: 'Upper Body A', type: 'Strength Push/Pull', isRest: false, workoutId: 'upper_a' as const },
   { day: 'Tue', session: 'Lower Body A', type: 'Glutes & Hamstrings', isRest: false, workoutId: 'lower_a' as const },
-  { day: 'Wed', session: 'Rest & Walk', type: 'Light Steps', isRest: true },
-  { day: 'Thu', session: 'Upper Body B', type: 'Sculpt & Hypertrophy', isRest: false, workoutId: 'upper_b' as const },
-  { day: 'Fri', session: 'Lower Body B', type: 'Quads & Stability', isRest: false, workoutId: 'lower_b' as const },
-  { day: 'Sat', session: 'Full-Body & Core', type: 'Compound & Stability', isRest: false, workoutId: 'full_body_session' as const },
+  { day: 'Wed', session: 'Full-Body & Core', type: 'Compound & Stability', isRest: false, workoutId: 'full_body_session' as const },
+  { day: 'Thu', session: 'Rest & Walk', type: 'Light Steps', isRest: true },
+  { day: 'Fri', session: 'Upper Body B', type: 'Sculpt & Hypertrophy', isRest: false, workoutId: 'upper_b' as const },
+  { day: 'Sat', session: 'Lower Body B', type: 'Quads & Stability', isRest: false, workoutId: 'lower_b' as const },
   { day: 'Sun', session: 'Rest & Recharge', type: 'Sleep & Reset', isRest: true },
 ];
 
@@ -252,8 +254,45 @@ export const WORKOUT_PLANS: WorkoutDayPlan[] = [
     ],
   },
   {
+    id: 'full_body_session',
+    dayLabel: 'Wednesday · Full-Body & Core',
+    title: 'Full-Body Strength & Core (1x/wk)',
+    subtitle: 'Compound strength, upper push/pull circuit, and core & ankle stability.',
+    ankleProtected: true,
+    focusSummary: 'Compound strength, upper push/pull circuit, and core/ankle stability.',
+    exercises: [
+      {
+        id: 'fb_1',
+        order: 1,
+        name: 'Primary Compound Lift (Box Squat, RDL, or Incline Press)',
+        sets: 4,
+        reps: '6–8 reps',
+        tip: 'Flat shoes on & form dialed in.',
+        defaultWeightLbs: 85,
+      },
+      {
+        id: 'fb_2',
+        order: 2,
+        name: 'Upper Body Push / Pull Circuit',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Steady pace and clean reps.',
+        defaultWeightLbs: 40,
+      },
+      {
+        id: 'fb_3',
+        order: 3,
+        name: 'Core & Ankle Balance Finisher',
+        sets: 3,
+        reps: '12 reps',
+        tip: 'Controlled core & stability work.',
+        defaultWeightLbs: 20,
+      },
+    ],
+  },
+  {
     id: 'upper_b',
-    dayLabel: 'Thursday · Upper B',
+    dayLabel: 'Friday · Upper B',
     title: 'Upper Body B (Sculpt & Pump)',
     subtitle: 'Higher reps for muscle tone and posture.',
     ankleProtected: false,
@@ -317,7 +356,7 @@ export const WORKOUT_PLANS: WorkoutDayPlan[] = [
   },
   {
     id: 'lower_b',
-    dayLabel: 'Friday · Lower B (Ankle-Safe)',
+    dayLabel: 'Saturday · Lower B (Ankle-Safe)',
     title: 'Lower Body B (Quads & Stability)',
     subtitle: 'Zero high-impact landings; built-in left ankle options.',
     ankleProtected: true,
@@ -366,44 +405,115 @@ export const WORKOUT_PLANS: WorkoutDayPlan[] = [
       },
     ],
   },
-  {
-    id: 'full_body_session',
-    dayLabel: 'Saturday · Full-Body & Core',
-    title: 'Full-Body Strength & Core (1x/wk)',
-    subtitle: 'Compound strength, upper push/pull circuit, and core & ankle stability.',
-    ankleProtected: true,
-    focusSummary: 'Compound strength, upper push/pull circuit, and core/ankle stability.',
-    exercises: [
-      {
-        id: 'fb_1',
-        order: 1,
-        name: 'Primary Compound Lift (Box Squat, RDL, or Incline Press)',
-        sets: 4,
-        reps: '6–8 reps',
-        tip: 'Flat shoes on & form dialed in.',
-        defaultWeightLbs: 85,
-      },
-      {
-        id: 'fb_2',
-        order: 2,
-        name: 'Upper Body Push / Pull Circuit',
-        sets: 3,
-        reps: '8–10 reps',
-        tip: 'Steady pace and clean reps.',
-        defaultWeightLbs: 40,
-      },
-      {
-        id: 'fb_3',
-        order: 3,
-        name: 'Core & Ankle Balance Finisher',
-        sets: 3,
-        reps: '12 reps',
-        tip: 'Controlled core & stability work.',
-        defaultWeightLbs: 20,
-      },
-    ],
-  },
 ];
+
+export interface SetLogEntry {
+  weightLbs: number;
+  repsCompleted: string;
+  completed: boolean;
+}
+
+export function buildDefaultSetLogs(
+  plans: WorkoutDayPlan[] = WORKOUT_PLANS
+): Record<string, SetLogEntry> {
+  const initial: Record<string, SetLogEntry> = {};
+  for (const plan of plans) {
+    for (const ex of plan.exercises) {
+      for (let s = 1; s <= ex.sets; s++) {
+        initial[`${ex.id}_set_${s}`] = {
+          weightLbs: ex.defaultWeightLbs,
+          repsCompleted: ex.reps.replace(' reps', ''),
+          completed: false,
+        };
+      }
+    }
+  }
+  return initial;
+}
+
+export function createCustomWorkoutPlan(input: {
+  id?: string;
+  title: string;
+  subtitle?: string;
+  ankleProtected?: boolean;
+  exercises: Array<{
+    name: string;
+    sets: number;
+    reps: string;
+    defaultWeightLbs: number;
+    tip?: string;
+  }>;
+}): WorkoutDayPlan {
+  const cleanTitle = input.title.trim() || 'Custom Workout';
+  const cleanSubtitle =
+    input.subtitle?.trim() || 'Custom saved workout session.';
+  const workoutId =
+    input.id || `custom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
+  return {
+    id: workoutId,
+    dayLabel: `Custom · ${cleanTitle}`,
+    shortTabLabel: cleanTitle,
+    title: cleanTitle,
+    subtitle: cleanSubtitle,
+    ankleProtected: Boolean(input.ankleProtected),
+    focusSummary: cleanSubtitle,
+    isCustom: true,
+    exercises: input.exercises.map((ex, idx) => ({
+      id: `${workoutId}_ex_${idx + 1}`,
+      order: idx + 1,
+      name: ex.name.trim() || `Exercise ${idx + 1}`,
+      sets: Math.max(1, Math.min(10, Math.round(ex.sets) || 3)),
+      reps: ex.reps.trim() || '10–12 reps',
+      defaultWeightLbs: Math.max(0, Number(ex.defaultWeightLbs) || 0),
+      tip: ex.tip?.trim() || undefined,
+    })),
+  };
+}
+
+export function resolveWeeklySchedule(
+  customWorkouts: WorkoutDayPlan[] = [],
+  scheduleOverrides: Record<string, string> = {}
+) {
+  const allWorkouts = [...WORKOUT_PLANS, ...customWorkouts];
+  const workoutMap = new Map(allWorkouts.map((w) => [w.id, w]));
+
+  return WEEKLY_SPLIT_OVERVIEW.map((defaultSlot) => {
+    const overrideId = scheduleOverrides[defaultSlot.day];
+    if (!overrideId) {
+      return defaultSlot;
+    }
+    if (overrideId === 'rest_walk') {
+      return {
+        day: defaultSlot.day,
+        session: 'Rest & Walk',
+        type: 'Light Steps',
+        isRest: true,
+        workoutId: undefined,
+      };
+    }
+    if (overrideId === 'rest_recharge') {
+      return {
+        day: defaultSlot.day,
+        session: 'Rest & Recharge',
+        type: 'Sleep & Reset',
+        isRest: true,
+        workoutId: undefined,
+      };
+    }
+    const matched = workoutMap.get(overrideId);
+    if (!matched) {
+      return defaultSlot;
+    }
+    return {
+      day: defaultSlot.day,
+      session: matched.shortTabLabel || matched.title.replace(/\s*\(.*\)/, ''),
+      type: matched.isCustom ? 'Custom Workout' : matched.focusSummary.split(',')[0],
+      isRest: false,
+      workoutId: matched.id,
+    };
+  });
+}
 
 export const APPROVED_FOOD_CATALOG: ApprovedFoodItem[] = [
   // LEAN PROTEINS

@@ -13,6 +13,12 @@ import {
   type FoodLogEntry,
   type BodyMeasurementEntry,
 } from './recompLogic';
+import {
+  WORKOUT_PLANS,
+  createCustomWorkoutPlan,
+  resolveWeeklySchedule,
+  buildDefaultSetLogs,
+} from '../data/programData';
 
 test('prescribed targets match exact nutrition brief (2118 kcal, 129P, 282C, 60F, <40 sugar, <20 sat fat, 120oz water)', () => {
   assert.equal(PRESCRIBED_TARGETS.calories, 2118);
@@ -234,3 +240,49 @@ test('getLocalDateString and getTimeUntilMidnight return properly formatted valu
   assert.equal(countdown.seconds, 0);
   assert.equal(countdown.formatted, '00:30:00');
 });
+
+test('createCustomWorkoutPlan and resolveWeeklySchedule persist custom workouts and allow scheduling onto any weekday', () => {
+  const customPlan = createCustomWorkoutPlan({
+    title: 'Glute & Core Sparkle',
+    subtitle: 'Hip thrusts, cable kickbacks, and planks',
+    ankleProtected: true,
+    exercises: [
+      { name: 'Barbell Hip Thrust', sets: 4, reps: '8-10', defaultWeightLbs: 135, tip: 'Pause 1s at top' },
+      { name: 'Cable Glute Kickback', sets: 3, reps: '12-15', defaultWeightLbs: 30, tip: 'Keep hips square' },
+    ],
+  });
+
+  assert.ok(customPlan.id.startsWith('custom_'));
+  assert.equal(customPlan.isCustom, true);
+  assert.equal(customPlan.ankleProtected, true);
+  assert.equal(customPlan.exercises.length, 2);
+
+  const logs = buildDefaultSetLogs([...WORKOUT_PLANS, customPlan]);
+  const ex1Id = customPlan.exercises[0].id;
+  const ex2Id = customPlan.exercises[1].id;
+  assert.equal(logs[`${ex1Id}_set_1`]?.weightLbs, 135);
+  assert.equal(logs[`${ex2Id}_set_3`]?.repsCompleted, '12-15');
+
+  // Default schedule: Wed = full_body_session, Thu = Rest & Walk, Fri = upper_b, Sat = lower_b
+  const defaultSched = resolveWeeklySchedule([customPlan], {});
+  assert.equal(defaultSched.find((d) => d.day === 'Wed')?.workoutId, 'full_body_session');
+  assert.equal(defaultSched.find((d) => d.day === 'Thu')?.session, 'Rest & Walk');
+  assert.equal(defaultSched.find((d) => d.day === 'Fri')?.workoutId, 'upper_b');
+  assert.equal(defaultSched.find((d) => d.day === 'Sat')?.workoutId, 'lower_b');
+
+  // Schedule custom workout onto Thursday and Sunday
+  const overridden = resolveWeeklySchedule([customPlan], {
+    Thu: customPlan.id,
+    Sun: 'upper_a',
+  });
+  const thuSlot = overridden.find((d) => d.day === 'Thu');
+  assert.equal(thuSlot?.workoutId, customPlan.id);
+  assert.equal(thuSlot?.session, 'Glute & Core Sparkle');
+  assert.equal(thuSlot?.type, 'Custom Workout');
+  assert.equal(thuSlot?.isRest, false);
+
+  const sunSlot = overridden.find((d) => d.day === 'Sun');
+  assert.equal(sunSlot?.workoutId, 'upper_a');
+  assert.equal(sunSlot?.session, 'Upper Body A');
+});
+

@@ -16,7 +16,10 @@ import {
   INITIAL_FOOD_LOGS,
   INITIAL_MEASUREMENT_LOGS,
   INITIAL_WEEKLY_CONSISTENCY,
+  WORKOUT_PLANS,
+  buildDefaultSetLogs,
   type WorkoutDayPlan,
+  type SetLogEntry,
 } from './data/programData';
 import { WorkoutsView } from './components/WorkoutsView';
 import { NutritionView } from './components/NutritionView';
@@ -29,32 +32,192 @@ type ActiveTab = 'dashboard' | 'workouts' | 'nutrition' | 'goals';
 const STORAGE_KEY = 'recompos_clean_state_v2';
 const LEGACY_STORAGE_KEY = 'recompos_github_state_v1';
 
+function getDefaultWorkoutIdForToday(): WorkoutDayPlan['id'] {
+  const day = new Date().getDay();
+  if (day === 1) return 'upper_a';
+  if (day === 2) return 'lower_a';
+  if (day === 3) return 'full_body_session';
+  if (day === 5) return 'upper_b';
+  if (day === 6) return 'lower_b';
+  return 'upper_a';
+}
+
+function loadHydratedAppState() {
+  const todayStr = getLocalDateString();
+  const defaultWarmup = {
+    ankle_circles: false,
+    wall_stretch: false,
+    band_resisted: false,
+  };
+
+  try {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return null;
+
+    const parsed = JSON.parse(saved);
+    const savedDate = parsed.lastActiveDate || todayStr;
+    const savedCustomWorkouts: WorkoutDayPlan[] = Array.isArray(parsed.customWorkouts)
+      ? parsed.customWorkouts
+      : [];
+    const savedScheduleOverrides: Record<string, string> =
+      parsed.scheduleOverrides && typeof parsed.scheduleOverrides === 'object'
+        ? parsed.scheduleOverrides
+        : {};
+
+    const defaultSetLogs = buildDefaultSetLogs([...WORKOUT_PLANS, ...savedCustomWorkouts]);
+    const rawSetLogs: Record<string, SetLogEntry> = { ...defaultSetLogs };
+    if (parsed.setLogs && typeof parsed.setLogs === 'object') {
+      for (const [k, v] of Object.entries(parsed.setLogs)) {
+        if (v && typeof v === 'object') {
+          const entry = v as Partial<SetLogEntry>;
+          rawSetLogs[k] = {
+            weightLbs:
+              typeof entry.weightLbs === 'number'
+                ? entry.weightLbs
+                : defaultSetLogs[k]?.weightLbs ?? 0,
+            repsCompleted:
+              typeof entry.repsCompleted === 'string'
+                ? entry.repsCompleted
+                : defaultSetLogs[k]?.repsCompleted ?? '8-10',
+            completed: Boolean(entry.completed),
+          };
+        }
+      }
+    }
+
+    const setCompletionMap: Record<string, boolean> = {};
+    for (const [k, v] of Object.entries(rawSetLogs)) {
+      setCompletionMap[k] = v.completed;
+    }
+
+    const resetCheck = applyMidnightResetIfNeeded(
+      {
+        lastActiveDate: savedDate,
+        foodLogs: Array.isArray(parsed.foodLogs) ? parsed.foodLogs : [],
+        waterOz: typeof parsed.waterOz === 'number' ? parsed.waterOz : 0,
+        macroDayCreditedToday: Boolean(parsed.macroDayCreditedToday),
+        ankleWarmupChecks: parsed.ankleWarmupChecks || defaultWarmup,
+        flatShoesVerified: Boolean(parsed.flatShoesVerified),
+        lissMinutesToday:
+          typeof parsed.lissMinutesToday === 'number' ? parsed.lissMinutesToday : 0,
+        setCompletionMap,
+      },
+      todayStr
+    );
+
+    const hydratedSetLogs: Record<string, SetLogEntry> = {};
+    for (const [k, v] of Object.entries(rawSetLogs)) {
+      hydratedSetLogs[k] = {
+        ...v,
+        completed: Boolean(resetCheck.state.setCompletionMap[k]),
+      };
+    }
+
+    return {
+      lastActiveDate: resetCheck.state.lastActiveDate,
+      foodLogs: resetCheck.state.foodLogs,
+      waterOz: resetCheck.state.waterOz,
+      macroDayCreditedToday: resetCheck.state.macroDayCreditedToday,
+      ankleWarmupChecks: resetCheck.state.ankleWarmupChecks,
+      flatShoesVerified: resetCheck.state.flatShoesVerified,
+      lissMinutesToday: resetCheck.state.lissMinutesToday,
+      setLogs: hydratedSetLogs,
+      activeWorkoutId:
+        (parsed.activeWorkoutId as WorkoutDayPlan['id']) || getDefaultWorkoutIdForToday(),
+      activeTargets:
+        parsed.activeTargets && typeof parsed.activeTargets.calories === 'number'
+          ? (parsed.activeTargets as MacroTargets)
+          : PRESCRIBED_TARGETS,
+      measurements: Array.isArray(parsed.measurements)
+        ? parsed.measurements
+        : INITIAL_MEASUREMENT_LOGS,
+      weeklyConsistency: parsed.weeklyConsistency
+        ? { ...INITIAL_WEEKLY_CONSISTENCY, ...parsed.weeklyConsistency }
+        : INITIAL_WEEKLY_CONSISTENCY,
+      completedSessionsThisWeek: Array.isArray(parsed.completedSessionsThisWeek)
+        ? parsed.completedSessionsThisWeek
+        : [],
+      lungeSwappedToBss:
+        typeof parsed.lungeSwappedToBss === 'boolean' ? parsed.lungeSwappedToBss : false,
+      lissModality:
+        typeof parsed.lissModality === 'string'
+          ? parsed.lissModality
+          : 'Incline Treadmill Walk',
+      customWorkouts: savedCustomWorkouts,
+      scheduleOverrides: savedScheduleOverrides,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
+  const [initialHydrated] = useState(() => loadHydratedAppState());
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
-  const [lastActiveDate, setLastActiveDate] = useState<string>(() => getLocalDateString());
+  const [lastActiveDate, setLastActiveDate] = useState<string>(
+    () => initialHydrated?.lastActiveDate ?? getLocalDateString()
+  );
   const [midnightCountdown, setMidnightCountdown] = useState<string>(
     () => getTimeUntilMidnight().formatted
   );
 
-  // Zero demo data initial states
-  const [foodLogs, setFoodLogs] = useState<FoodLogEntry[]>(INITIAL_FOOD_LOGS);
-  const [waterOz, setWaterOz] = useState<number>(0);
-  const [activeTargets, setActiveTargets] = useState<MacroTargets>(PRESCRIBED_TARGETS);
-  const [measurements, setMeasurements] = useState<BodyMeasurementEntry[]>(INITIAL_MEASUREMENT_LOGS);
-  const [weeklyConsistency, setWeeklyConsistency] = useState<WeeklyConsistencyState>(
-    INITIAL_WEEKLY_CONSISTENCY
+  // Persisted daily & weekly states (zero demo data by default)
+  const [foodLogs, setFoodLogs] = useState<FoodLogEntry[]>(
+    () => initialHydrated?.foodLogs ?? INITIAL_FOOD_LOGS
   );
-  const [completedSessionsThisWeek, setCompletedSessionsThisWeek] = useState<string[]>([]);
-  const [ankleWarmupChecks, setAnkleWarmupChecks] = useState<Record<string, boolean>>({
-    ankle_circles: false,
-    wall_stretch: false,
-    band_resisted: false,
-  });
-  const [flatShoesVerified, setFlatShoesVerified] = useState<boolean>(false);
-  const [lungeSwappedToBss, setLungeSwappedToBss] = useState<boolean>(false);
-  const [lissModality, setLissModality] = useState<string>('Incline Treadmill Walk');
-  const [lissMinutesToday, setLissMinutesToday] = useState<number>(0);
-  const [macroDayCreditedToday, setMacroDayCreditedToday] = useState<boolean>(false);
+  const [waterOz, setWaterOz] = useState<number>(() => initialHydrated?.waterOz ?? 0);
+  const [activeTargets, setActiveTargets] = useState<MacroTargets>(
+    () => initialHydrated?.activeTargets ?? PRESCRIBED_TARGETS
+  );
+  const [measurements, setMeasurements] = useState<BodyMeasurementEntry[]>(
+    () => initialHydrated?.measurements ?? INITIAL_MEASUREMENT_LOGS
+  );
+  const [weeklyConsistency, setWeeklyConsistency] = useState<WeeklyConsistencyState>(
+    () => initialHydrated?.weeklyConsistency ?? INITIAL_WEEKLY_CONSISTENCY
+  );
+  const [completedSessionsThisWeek, setCompletedSessionsThisWeek] = useState<string[]>(
+    () => initialHydrated?.completedSessionsThisWeek ?? []
+  );
+  const [activeWorkoutId, setActiveWorkoutId] = useState<WorkoutDayPlan['id']>(
+    () => initialHydrated?.activeWorkoutId ?? getDefaultWorkoutIdForToday()
+  );
+  const [setLogs, setSetLogs] = useState<Record<string, SetLogEntry>>(
+    () => initialHydrated?.setLogs ?? buildDefaultSetLogs()
+  );
+  const [ankleWarmupChecks, setAnkleWarmupChecks] = useState<Record<string, boolean>>(
+    () =>
+      initialHydrated?.ankleWarmupChecks ?? {
+        ankle_circles: false,
+        wall_stretch: false,
+        band_resisted: false,
+      }
+  );
+  const [flatShoesVerified, setFlatShoesVerified] = useState<boolean>(
+    () => initialHydrated?.flatShoesVerified ?? false
+  );
+  const [lungeSwappedToBss, setLungeSwappedToBss] = useState<boolean>(
+    () => initialHydrated?.lungeSwappedToBss ?? false
+  );
+  const [lissModality, setLissModality] = useState<string>(
+    () => initialHydrated?.lissModality ?? 'Incline Treadmill Walk'
+  );
+  const [lissMinutesToday, setLissMinutesToday] = useState<number>(
+    () => initialHydrated?.lissMinutesToday ?? 0
+  );
+  const [macroDayCreditedToday, setMacroDayCreditedToday] = useState<boolean>(
+    () => initialHydrated?.macroDayCreditedToday ?? false
+  );
+  const [customWorkouts, setCustomWorkouts] = useState<WorkoutDayPlan[]>(
+    () => initialHydrated?.customWorkouts ?? []
+  );
+  const [scheduleOverrides, setScheduleOverrides] = useState<Record<string, string>>(
+    () => initialHydrated?.scheduleOverrides ?? {}
+  );
 
   const performDailyMidnightReset = useCallback((newDateStr: string) => {
     setLastActiveDate(newDateStr);
@@ -68,59 +231,13 @@ export default function App() {
     });
     setFlatShoesVerified(false);
     setLissMinutesToday(0);
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
-
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const todayStr = getLocalDateString();
-        const savedDate = parsed.lastActiveDate || todayStr;
-
-        const resetCheck = applyMidnightResetIfNeeded(
-          {
-            lastActiveDate: savedDate,
-            foodLogs: Array.isArray(parsed.foodLogs) ? parsed.foodLogs : [],
-            waterOz: typeof parsed.waterOz === 'number' ? parsed.waterOz : 0,
-            macroDayCreditedToday: Boolean(parsed.macroDayCreditedToday),
-            ankleWarmupChecks: parsed.ankleWarmupChecks || {
-              ankle_circles: false,
-              wall_stretch: false,
-              band_resisted: false,
-            },
-            flatShoesVerified: Boolean(parsed.flatShoesVerified),
-            lissMinutesToday: typeof parsed.lissMinutesToday === 'number' ? parsed.lissMinutesToday : 0,
-            setCompletionMap: {},
-          },
-          todayStr
-        );
-
-        setLastActiveDate(resetCheck.state.lastActiveDate);
-        setFoodLogs(resetCheck.state.foodLogs);
-        setWaterOz(resetCheck.state.waterOz);
-        setMacroDayCreditedToday(resetCheck.state.macroDayCreditedToday);
-        setAnkleWarmupChecks(resetCheck.state.ankleWarmupChecks);
-        setFlatShoesVerified(resetCheck.state.flatShoesVerified);
-        setLissMinutesToday(resetCheck.state.lissMinutesToday);
-
-        if (Array.isArray(parsed.measurements)) setMeasurements(parsed.measurements);
-        if (parsed.weeklyConsistency) setWeeklyConsistency(parsed.weeklyConsistency);
-        if (Array.isArray(parsed.completedSessionsThisWeek)) {
-          setCompletedSessionsThisWeek(parsed.completedSessionsThisWeek);
-        }
-        if (typeof parsed.lungeSwappedToBss === 'boolean') {
-          setLungeSwappedToBss(parsed.lungeSwappedToBss);
-        }
-        if (typeof parsed.lissModality === 'string') {
-          setLissModality(parsed.lissModality);
-        }
+    setSetLogs((prev) => {
+      const next: Record<string, SetLogEntry> = {};
+      for (const [k, v] of Object.entries(prev)) {
+        next[k] = { ...v, completed: false };
       }
-    } catch {
-      // Ignore storage read errors
-    }
+      return next;
+    });
   }, []);
 
   // Live 1-second Midnight Reset Watcher & Countdown
@@ -159,15 +276,20 @@ export default function App() {
           lastActiveDate,
           foodLogs,
           waterOz,
+          activeTargets,
           macroDayCreditedToday,
           ankleWarmupChecks,
           flatShoesVerified,
           measurements,
           weeklyConsistency,
           completedSessionsThisWeek,
+          activeWorkoutId,
+          setLogs,
           lungeSwappedToBss,
           lissModality,
           lissMinutesToday,
+          customWorkouts,
+          scheduleOverrides,
         })
       );
     } catch {
@@ -177,15 +299,20 @@ export default function App() {
     lastActiveDate,
     foodLogs,
     waterOz,
+    activeTargets,
     macroDayCreditedToday,
     ankleWarmupChecks,
     flatShoesVerified,
     measurements,
     weeklyConsistency,
     completedSessionsThisWeek,
+    activeWorkoutId,
+    setLogs,
     lungeSwappedToBss,
     lissModality,
     lissMinutesToday,
+    customWorkouts,
+    scheduleOverrides,
   ]);
 
   const nutritionStatus = calculateDailyNutritionStatus(foodLogs, activeTargets);
@@ -224,6 +351,46 @@ export default function App() {
         programmedWorkoutsCompleted: Math.min(4, prev.programmedWorkoutsCompleted + 1),
       };
     });
+  };
+
+  const handleAddCustomWorkout = (workout: WorkoutDayPlan, scheduleDay?: string) => {
+    setCustomWorkouts((prev) => [...prev, workout]);
+    const newWorkoutLogs = buildDefaultSetLogs([workout]);
+    setSetLogs((prev) => ({
+      ...newWorkoutLogs,
+      ...prev,
+    }));
+    if (scheduleDay) {
+      setScheduleOverrides((prev) => ({
+        ...prev,
+        [scheduleDay]: workout.id,
+      }));
+    }
+    setActiveWorkoutId(workout.id);
+  };
+
+  const handleDeleteCustomWorkout = (workoutId: string) => {
+    setCustomWorkouts((prev) => prev.filter((w) => w.id !== workoutId));
+    setScheduleOverrides((prev) => {
+      const next: Record<string, string> = {};
+      for (const [day, assignedId] of Object.entries(prev)) {
+        if (assignedId !== workoutId) {
+          next[day] = assignedId;
+        }
+      }
+      return next;
+    });
+  };
+
+  const handleUpdateScheduleDay = (day: string, workoutOrRestId: string) => {
+    setScheduleOverrides((prev) => ({
+      ...prev,
+      [day]: workoutOrRestId,
+    }));
+  };
+
+  const handleResetScheduleOverrides = () => {
+    setScheduleOverrides({});
   };
 
   const handleToggleAnkleWarmup = (id: string) => {
@@ -624,6 +791,10 @@ export default function App() {
 
         {activeTab === 'workouts' && (
           <WorkoutsView
+            activeWorkoutId={activeWorkoutId}
+            onSelectWorkoutId={setActiveWorkoutId}
+            setLogs={setLogs}
+            onUpdateSetLogs={setSetLogs}
             completedSessionsThisWeek={completedSessionsThisWeek}
             onCompleteSession={handleCompleteSession}
             ankleWarmupChecks={ankleWarmupChecks}
@@ -638,7 +809,12 @@ export default function App() {
               setLissModality(mod);
               setLissMinutesToday(mins);
             }}
-            lastActiveDate={lastActiveDate}
+            customWorkouts={customWorkouts}
+            onAddCustomWorkout={handleAddCustomWorkout}
+            onDeleteCustomWorkout={handleDeleteCustomWorkout}
+            scheduleOverrides={scheduleOverrides}
+            onUpdateScheduleDay={handleUpdateScheduleDay}
+            onResetScheduleOverrides={handleResetScheduleOverrides}
           />
         )}
 
