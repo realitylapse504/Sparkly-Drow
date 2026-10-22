@@ -12,11 +12,33 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="./assets/index-DSNKE566.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Dqqi_Wmy.css">
+    <script type="module" crossorigin src="./assets/app.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/app.css">
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.__bootFallbackBundle = function () {
+        if (window.__fallbackBooted) return;
+        window.__fallbackBooted = true;
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = './docs/assets/app.css';
+        document.head.appendChild(link);
+        var script = document.createElement('script');
+        script.type = 'module';
+        script.src = './docs/assets/app.js';
+        document.head.appendChild(script);
+      };
+    </script>
+    <script>
+      setTimeout(function () {
+        var root = document.getElementById('root');
+        if (root && root.childNodes.length === 0) {
+          window.__bootFallbackBundle();
+        }
+      }, 900);
+    </script>
   </body>
 </html>
 
