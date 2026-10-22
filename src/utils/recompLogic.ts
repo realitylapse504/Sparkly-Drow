@@ -64,7 +64,7 @@ export interface BodyMeasurementEntry {
 }
 
 export interface WeeklyConsistencyState {
-  tracySessionCompleted: boolean;
+  weeklyFullBodyCompleted: boolean;
   programmedWorkoutsCompleted: number; // Goal: >= 2 (up to 4 for full Upper/Lower split)
   macroDaysTrackedAndHit: number; // Goal: >= 5 (out of 7, 2 days flexible)
   cheatMode: 'one_day' | 'two_meals';
@@ -266,7 +266,7 @@ export function calculateInchChangeSummary(entries: BodyMeasurementEntry[]) {
 
 export function evaluateWeeklyKeysToSuccess(state: WeeklyConsistencyState) {
   const workoutKeyMet =
-    state.tracySessionCompleted && state.programmedWorkoutsCompleted >= 2;
+    state.weeklyFullBodyCompleted && state.programmedWorkoutsCompleted >= 2;
   const macroKeyMet = state.macroDaysTrackedAndHit >= 5;
   const maxAllowedCheats = state.cheatMode === 'one_day' ? 1 : 2;
   const cheatKeyMet = state.cheatUsedCount <= maxAllowedCheats;

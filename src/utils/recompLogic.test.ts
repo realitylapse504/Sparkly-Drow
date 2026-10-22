@@ -103,9 +103,9 @@ test('calculateDailyNutritionStatus flags sugar > 40g and saturated fat > 20g', 
   assert.equal(overSugarStatus.isTargetHit, false);
 });
 
-test('evaluateWeeklyKeysToSuccess validates Tracy 1x + 2 workouts, 5/7 macro days, and cheat options', () => {
+test('evaluateWeeklyKeysToSuccess validates 1x Full-Body + 2 split workouts, 5/7 macro days, and cheat options', () => {
   const passingWeek = evaluateWeeklyKeysToSuccess({
-    tracySessionCompleted: true,
+    weeklyFullBodyCompleted: true,
     programmedWorkoutsCompleted: 2,
     macroDaysTrackedAndHit: 5,
     cheatMode: 'two_meals',
@@ -118,7 +118,7 @@ test('evaluateWeeklyKeysToSuccess validates Tracy 1x + 2 workouts, 5/7 macro day
   assert.equal(passingWeek.allKeysMet, true);
 
   const overCheatDay = evaluateWeeklyKeysToSuccess({
-    tracySessionCompleted: true,
+    weeklyFullBodyCompleted: true,
     programmedWorkoutsCompleted: 3,
     macroDaysTrackedAndHit: 5,
     cheatMode: 'one_day',

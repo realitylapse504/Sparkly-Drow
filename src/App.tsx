@@ -21,7 +21,7 @@ import {
 import { WorkoutsView } from './components/WorkoutsView';
 import { NutritionView } from './components/NutritionView';
 import { GoalsAndPillarsView } from './components/GoalsAndPillarsView';
-import { Check, ShieldCheck, Flame, Droplets, Dumbbell, RotateCcw, Clock } from 'lucide-react';
+import { Check, Flame, Droplets, Dumbbell, RotateCcw, Clock, Ruler, ArrowRight } from 'lucide-react';
 
 type ActiveTab = 'dashboard' | 'workouts' | 'nutrition' | 'goals';
 
@@ -69,7 +69,6 @@ export default function App() {
     setLissMinutesToday(0);
   }, []);
 
-  // Load persisted state from localStorage and run midnight reset check if date changed
   useEffect(() => {
     try {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
@@ -151,7 +150,6 @@ export default function App() {
     };
   }, [lastActiveDate, performDailyMidnightReset]);
 
-  // Save state changes to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -192,6 +190,7 @@ export default function App() {
   const nutritionStatus = calculateDailyNutritionStatus(foodLogs, activeTargets);
   const inchSummary = calculateInchChangeSummary(measurements);
   const keysStatus = evaluateWeeklyKeysToSuccess(weeklyConsistency);
+  const waterPct = Math.min(100, Math.round((waterOz / activeTargets.waterOz) * 100));
 
   const handleAddFoodLog = (entry: Omit<FoodLogEntry, 'id' | 'timestamp'>) => {
     const now = new Date();
@@ -216,8 +215,8 @@ export default function App() {
 
     setCompletedSessionsThisWeek((prev) => [...prev, workoutId]);
     setWeeklyConsistency((prev) => {
-      if (workoutId === 'tracy_session') {
-        return { ...prev, tracySessionCompleted: true };
+      if (workoutId === 'full_body_session') {
+        return { ...prev, weeklyFullBodyCompleted: true };
       }
       return {
         ...prev,
@@ -260,29 +259,29 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col text-slate-900">
-      {/* Strict 3-Zone Top Bar Contract — Turquoise & Pink Theme */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-teal-200/80 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-8">
-          {/* Zone 1: Single text element wordmark */}
+      {/* Strict 3-Zone Top Bar Contract — Bubbly Turquoise & Pink */}
+      <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-pink-200/70 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-8">
+          {/* Zone 1: Brand Wordmark */}
           <a
             href="#top"
             onClick={(e) => {
               e.preventDefault();
               handleSelectTab('dashboard');
             }}
-            className="text-lg font-bold tracking-tight bg-gradient-to-r from-teal-600 via-pink-600 to-teal-600 bg-clip-text text-transparent whitespace-nowrap shrink-0"
+            className="text-xl font-bold tracking-tight bg-gradient-to-r from-teal-500 via-pink-500 to-teal-500 bg-clip-text text-transparent whitespace-nowrap shrink-0"
           >
             The Sparkly Drow
           </a>
 
-          {/* Zone 2: 4 single-line text navigation links */}
-          <nav aria-label="Primary Navigation" className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+          {/* Zone 2: 4 Concise Nav Links */}
+          <nav aria-label="Primary Navigation" className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
             {(
               [
-                { id: 'dashboard', label: 'Command Center' },
-                { id: 'workouts', label: '4-Day Workout Split' },
-                { id: 'nutrition', label: 'Daily Nutrition' },
-                { id: 'goals', label: 'Inches & Pillars' },
+                { id: 'dashboard', label: 'Today' },
+                { id: 'workouts', label: 'Workouts' },
+                { id: 'nutrition', label: 'Nutrition' },
+                { id: 'goals', label: 'Progress & Guide' },
               ] as const
             ).map((nav) => (
               <button
@@ -291,8 +290,8 @@ export default function App() {
                 onClick={() => handleSelectTab(nav.id)}
                 className={`transition-colors whitespace-nowrap shrink-0 pb-0.5 ${
                   activeTab === nav.id
-                    ? 'text-pink-600 font-semibold border-b-2 border-teal-500'
-                    : 'text-slate-600 hover:text-teal-700'
+                    ? 'text-pink-600 font-bold border-b-2 border-teal-400'
+                    : 'text-slate-600 hover:text-teal-600'
                 }`}
               >
                 {nav.label}
@@ -300,37 +299,37 @@ export default function App() {
             ))}
           </nav>
 
-          {/* Zone 3: 1 primary action */}
+          {/* Zone 3: 1 Primary Action */}
           <div className="flex items-center gap-3 shrink-0">
             <button
               type="button"
               onClick={() => performDailyMidnightReset(getLocalDateString())}
-              className="px-4 py-2 text-xs font-semibold text-white bg-pink-600 rounded-lg hover:bg-pink-500 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-600 rounded-2xl hover:from-pink-600 hover:to-pink-700 transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset Today
+              Reset Day
             </button>
           </div>
         </div>
 
         {/* Mobile Secondary Tab Bar */}
-        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pt-3 mt-3 border-t border-pink-100">
+        <div className="flex md:hidden items-center gap-2 overflow-x-auto pt-3 mt-3 border-t border-pink-100">
           {(
             [
-              { id: 'dashboard', label: 'Overview' },
+              { id: 'dashboard', label: 'Today' },
               { id: 'workouts', label: 'Workouts' },
               { id: 'nutrition', label: 'Nutrition' },
-              { id: 'goals', label: 'Inches & Pillars' },
+              { id: 'goals', label: 'Progress' },
             ] as const
           ).map((nav) => (
             <button
               key={nav.id}
               type="button"
               onClick={() => handleSelectTab(nav.id)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap shrink-0 ${
                 activeTab === nav.id
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-teal-50 text-teal-900'
+                  ? 'bg-teal-500 text-white'
+                  : 'bg-pink-50 text-pink-800'
               }`}
             >
               {nav.label}
@@ -339,81 +338,79 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content Container (1440px baseline -> max-w-7xl) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-8">
+      {/* Main Content Container */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8 space-y-8">
         {activeTab === 'dashboard' && (
-          <>
-            {/* Hero / Weekly Keys to Success Command Center */}
-            <section className="bg-white border border-teal-200/90 rounded-xl p-6 lg:p-8">
+          <div className="space-y-8">
+            {/* Airy, Upbeat Hero Card */}
+            <section className="bg-white/95 border border-teal-200/80 rounded-3xl p-7 lg:p-8 shadow-xs">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                <div className="lg:col-span-7 flex flex-col justify-between space-y-5">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-teal-700 font-medium">
-                      <span>The Sparkly Drow Protocol</span>
+                {/* Left 6 Columns: Friendly Greeting & Quick Jumps */}
+                <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
+                  <div className="space-y-2.5">
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-teal-600">
+                      <span>4-Day Split</span>
                       <span aria-hidden="true">·</span>
-                      <span className="text-pink-600">Left Ankle Protected 4-Day Split</span>
+                      <span className="text-pink-500">Ankle-Friendly</span>
                       <span aria-hidden="true">·</span>
-                      <span className="font-mono tabular-nums inline-flex items-center gap-1 text-teal-800">
-                        <Clock className="w-3.5 h-3.5 text-pink-600" />
-                        Midnight Reset ({lastActiveDate}) in {midnightCountdown}
+                      <span className="font-mono tabular-nums inline-flex items-center gap-1 text-slate-500 font-normal">
+                        <Clock className="w-3.5 h-3.5 text-pink-500" />
+                        Resets in {midnightCountdown}
                       </span>
                     </div>
                     <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 text-balance">
-                      Simultaneous Fat Loss & Lean Muscle Growth Command
+                      Strong, Fueled & Feeling Good
                     </h1>
-                    <p className="text-sm text-slate-600 leading-relaxed max-w-2xl">
-                      Built around your four core pillars: progressive compound resistance training, a 2,118 kcal high-protein nutrition matrix (129g P / 282g C / 60g F), 7–9 hours of recovery sleep, and ankle-safe LISS & NEAT movement. Daily nutrition, hydration, warm-ups, and workout sets reset automatically at 12:00 AM.
+                    <p className="text-sm text-slate-600 leading-relaxed max-w-md">
+                      Your daily spot for ankle-friendly lifts, 2,118 cal macro goals, and 120 oz of water. Everything resets fresh at midnight!
                     </p>
                   </div>
 
-                  {/* Quick Navigation Triggers */}
-                  <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       type="button"
                       onClick={() => handleSelectTab('workouts')}
-                      className="px-4 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition-colors whitespace-nowrap shrink-0"
+                      className="px-5 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-600 text-white text-xs font-bold transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5"
                     >
-                      Open 4-Day Workout Split
+                      Start a Workout <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSelectTab('nutrition')}
-                      className="px-4 py-2.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-semibold transition-colors whitespace-nowrap shrink-0"
+                      className="px-5 py-2.5 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition-all whitespace-nowrap shrink-0"
                     >
-                      Log 2,118 kcal & 120 oz Water
+                      Log Food & Water
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSelectTab('goals')}
-                      className="px-4 py-2.5 rounded-lg border border-teal-300 bg-teal-50/60 hover:bg-teal-100/70 text-teal-900 text-xs font-semibold transition-colors whitespace-nowrap shrink-0"
+                      className="px-4 py-2.5 rounded-2xl border border-teal-200 bg-teal-50/60 hover:bg-teal-100/70 text-teal-900 text-xs font-bold transition-all whitespace-nowrap shrink-0"
                     >
-                      Track Inches & 4 Pillars
+                      Check-In Inches
                     </button>
                   </div>
                 </div>
 
-                {/* Right 5 Columns: Keys to Success Interactive Weekly Scorecard (Deep Drow Obsidian + Turquoise & Pink) */}
-                <div className="lg:col-span-5 bg-[#191326] text-white rounded-xl p-6 flex flex-col justify-between space-y-4 border border-pink-500/30">
-                  <div className="flex items-center justify-between border-b border-pink-500/20 pb-3">
+                {/* Right 6 Columns: Bubbly Weekly Wins (Keys to Success) */}
+                <div className="lg:col-span-6 bg-gradient-to-br from-teal-50/90 via-white to-pink-50/90 border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-pink-300 font-medium">Weekly Execution Contract</span>
-                      <h2 className="text-lg font-bold text-white">Keys to Success Scorecard</h2>
+                      <h2 className="text-base font-bold text-slate-900">This Week’s Keys to Success</h2>
+                      <p className="text-xs text-slate-500">Three simple habits that drive results</p>
                     </div>
-                    <span className="text-xs font-mono font-bold text-teal-300 tabular-nums">
-                      {keysStatus.totalKeysMet} / 3 Keys Active
+                    <span className="text-xs font-mono font-bold text-pink-600 tabular-nums">
+                      {keysStatus.totalKeysMet} / 3 Hit
                     </span>
                   </div>
 
-                  <div className="space-y-3.5 text-xs">
-                    {/* Key 1: Tracy 1x/wk + 2 Programmed Workouts */}
-                    <div className="p-3 rounded-lg bg-[#241c36] border border-teal-500/30 flex items-center justify-between gap-3">
+                  <div className="space-y-3 text-xs">
+                    {/* Key 1: Full-Body + 2 Split Days */}
+                    <div className="p-3.5 rounded-2xl bg-white border border-teal-200/80 flex items-center justify-between gap-3">
                       <div>
-                        <p className="font-semibold text-white">
-                          01. Strength Train with Tracy (1x) + 2 Programmed Workouts
-                        </p>
-                        <p className="text-pink-200/90 mt-0.5 font-mono tabular-nums">
-                          Tracy: {weeklyConsistency.tracySessionCompleted ? 'Done' : 'Pending'} · Programmed:{' '}
-                          {weeklyConsistency.programmedWorkoutsCompleted}/2+ sessions
+                        <p className="font-bold text-slate-900">1. Full-Body Session (1x) + 2 Split Days</p>
+                        <p className="text-slate-500 mt-0.5 font-mono tabular-nums">
+                          Full-Body: {weeklyConsistency.weeklyFullBodyCompleted ? 'Done' : 'Not yet'} · Split:{' '}
+                          {weeklyConsistency.programmedWorkoutsCompleted}/2
                         </p>
                       </div>
                       <button
@@ -421,31 +418,29 @@ export default function App() {
                         onClick={() =>
                           setWeeklyConsistency((prev) => ({
                             ...prev,
-                            tracySessionCompleted: !prev.tracySessionCompleted,
+                            weeklyFullBodyCompleted: !prev.weeklyFullBodyCompleted,
                           }))
                         }
-                        className={`px-2.5 py-1.5 rounded text-xs font-semibold whitespace-nowrap shrink-0 flex items-center gap-1 ${
-                          weeklyConsistency.tracySessionCompleted
-                            ? 'bg-teal-500 text-slate-950'
-                            : 'bg-pink-600 text-white hover:bg-pink-500'
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 flex items-center gap-1 transition-colors ${
+                          weeklyConsistency.weeklyFullBodyCompleted
+                            ? 'bg-teal-500 text-white'
+                            : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
                         }`}
                       >
-                        {weeklyConsistency.tracySessionCompleted && <Check className="w-3.5 h-3.5" />}
-                        <span>{weeklyConsistency.tracySessionCompleted ? 'Tracy 1x' : 'Log Tracy 1x'}</span>
+                        {weeklyConsistency.weeklyFullBodyCompleted && <Check className="w-3.5 h-3.5" />}
+                        <span>{weeklyConsistency.weeklyFullBodyCompleted ? 'Full-Body Done' : 'Check Full-Body'}</span>
                       </button>
                     </div>
 
-                    {/* Key 2: Track macros & hit targets 5x/week */}
-                    <div className="p-3 rounded-lg bg-[#241c36] border border-pink-500/30 flex items-center justify-between gap-3">
+                    {/* Key 2: 5 Macro Days */}
+                    <div className="p-3.5 rounded-2xl bg-white border border-pink-200/80 flex items-center justify-between gap-3">
                       <div>
-                        <p className="font-semibold text-white">
-                          02. Track Macros & Hit Targets 5x / Week
-                        </p>
-                        <p className="text-teal-200/90 mt-0.5 font-mono tabular-nums">
-                          {weeklyConsistency.macroDaysTrackedAndHit}/5 target days hit · 2 untracked days allowed
+                        <p className="font-bold text-slate-900">2. Hit Macros 5x / Week</p>
+                        <p className="text-slate-500 mt-0.5 font-mono tabular-nums">
+                          {weeklyConsistency.macroDaysTrackedAndHit}/5 days hit · 2 days off-duty!
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           type="button"
                           aria-label="Decrement tracked macro days"
@@ -455,7 +450,7 @@ export default function App() {
                               macroDaysTrackedAndHit: Math.max(0, prev.macroDaysTrackedAndHit - 1),
                             }))
                           }
-                          className="px-2 py-1 rounded bg-[#33284a] hover:bg-[#3f325c] text-pink-200 font-mono"
+                          className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
                         >
                           -
                         </button>
@@ -468,25 +463,23 @@ export default function App() {
                               macroDaysTrackedAndHit: Math.min(7, prev.macroDaysTrackedAndHit + 1),
                             }))
                           }
-                          className="px-2 py-1 rounded bg-teal-500 hover:bg-teal-400 text-slate-950 font-mono font-semibold"
+                          className="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-mono font-bold"
                         >
                           +1 Day
                         </button>
                       </div>
                     </div>
 
-                    {/* Key 3: Cheat Options Selector (1 Cheat Day OR 2 Cheat Meals) */}
-                    <div className="p-3 rounded-lg bg-[#241c36] border border-teal-500/30 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-white">
-                          03. Cheat Option: 1 Cheat Day OR 2 Cheat Meals
-                        </span>
-                        <span className="font-mono tabular-nums text-teal-300">
-                          {weeklyConsistency.cheatUsedCount}/{keysStatus.maxAllowedCheats} used
-                        </span>
+                    {/* Key 3: Cheat Option */}
+                    <div className="p-3.5 rounded-2xl bg-white border border-teal-200/80 flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="font-bold text-slate-900">3. Weekly Treat Choice</p>
+                        <p className="text-slate-500 mt-0.5 font-mono tabular-nums">
+                          {weeklyConsistency.cheatUsedCount}/{keysStatus.maxAllowedCheats} used this week
+                        </p>
                       </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1 bg-[#140f1f] p-1 rounded">
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1 bg-pink-50 p-1 rounded-xl border border-pink-200/60">
                           <button
                             type="button"
                             onClick={() =>
@@ -496,10 +489,10 @@ export default function App() {
                                 cheatUsedCount: Math.min(1, prev.cheatUsedCount),
                               }))
                             }
-                            className={`px-2 py-1 rounded text-[11px] font-semibold whitespace-nowrap shrink-0 ${
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 ${
                               weeklyConsistency.cheatMode === 'one_day'
                                 ? 'bg-pink-500 text-white'
-                                : 'text-pink-200/80 hover:text-white'
+                                : 'text-pink-700 hover:text-pink-900'
                             }`}
                           >
                             1 Cheat Day
@@ -512,114 +505,143 @@ export default function App() {
                                 cheatMode: 'two_meals',
                               }))
                             }
-                            className={`px-2 py-1 rounded text-[11px] font-semibold whitespace-nowrap shrink-0 ${
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 ${
                               weeklyConsistency.cheatMode === 'two_meals'
-                                ? 'bg-teal-400 text-slate-950'
-                                : 'text-teal-200/80 hover:text-white'
+                                ? 'bg-teal-500 text-white'
+                                : 'text-teal-800 hover:text-teal-950'
                             }`}
                           >
                             2 Cheat Meals
                           </button>
                         </div>
-
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setWeeklyConsistency((prev) => ({
-                                ...prev,
-                                cheatUsedCount:
-                                  (prev.cheatUsedCount + 1) % (keysStatus.maxAllowedCheats + 1),
-                              }))
-                            }
-                            className="px-2.5 py-1 rounded bg-pink-600 hover:bg-pink-500 text-white text-[11px] font-mono whitespace-nowrap shrink-0"
-                          >
-                            Log / Cycle Used
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setWeeklyConsistency((prev) => ({
+                              ...prev,
+                              cheatUsedCount:
+                                (prev.cheatUsedCount + 1) % (keysStatus.maxAllowedCheats + 1),
+                            }))
+                          }
+                          className="px-2.5 py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-800 text-[11px] font-bold whitespace-nowrap shrink-0"
+                        >
+                          Use Treat
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Full-Width 4-Column Daily Telemetry Strip Below Hero Split */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 pt-6 border-t border-pink-100">
-                <div className="p-4 rounded-lg bg-pink-50/50 border border-pink-200/80">
-                  <div className="flex items-center justify-between text-xs text-pink-700 font-medium">
-                    <span>Daily Calorie & Protein Fuel</span>
-                    <Flame className="w-4 h-4 text-pink-600" />
-                  </div>
-                  <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">
-                    {nutritionStatus.totals.calories} / {activeTargets.calories} kcal
-                  </p>
-                  <p className="text-xs font-mono tabular-nums text-slate-600 mt-1">
-                    Protein: {nutritionStatus.totals.protein}g / {activeTargets.protein}g · Carbs:{' '}
-                    {nutritionStatus.totals.carbs}g · Fats: {nutritionStatus.totals.fats}g
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-teal-50/50 border border-teal-200/80">
-                  <div className="flex items-center justify-between text-xs text-teal-700 font-medium">
-                    <span>Daily Hydration & Guardrails</span>
-                    <Droplets className="w-4 h-4 text-teal-600" />
-                  </div>
-                  <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">
-                    {waterOz} / {activeTargets.waterOz} oz Water
-                  </p>
-                  <p className="text-xs font-mono tabular-nums text-slate-600 mt-1">
-                    Sugar: {nutritionStatus.totals.sugar}g (&lt;40g) · Sat Fat:{' '}
-                    {nutritionStatus.totals.saturatedFat}g (&lt;20g)
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-pink-50/50 border border-pink-200/80">
-                  <div className="flex items-center justify-between text-xs text-pink-700 font-medium">
-                    <span>4-Day Split & Left Ankle Shield</span>
-                    <ShieldCheck className="w-4 h-4 text-teal-600" />
-                  </div>
-                  <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">
-                    {completedSessionsThisWeek.length} Sessions Logged
-                  </p>
-                  <p className="text-xs text-slate-600 mt-1">
-                    {lungeSwappedToBss
-                      ? 'Bulgarian Split Squat Swap Active'
-                      : 'Standard Low Step-Up / Lunge'}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-teal-50/50 border border-teal-200/80">
-                  <div className="flex items-center justify-between text-xs text-teal-700 font-medium">
-                    <span>Total Recomp Change in Inches</span>
-                    <Dumbbell className="w-4 h-4 text-pink-600" />
-                  </div>
-                  <p className="text-xl font-bold font-mono tabular-nums text-teal-700 mt-1">
-                    {measurements.length < 2
-                      ? '0.0 in'
-                      : `${inchSummary.totalInchesDelta} in (${inchSummary.waistDelta}" Waist)`}
-                  </p>
-                  <p className="text-xs font-mono tabular-nums text-slate-600 mt-1">
-                    {measurements.length === 0
-                      ? 'Log first measurement in Inches & Pillars'
-                      : `Energy: ${inchSummary.avgEnergy}/10 · Sleep: ${inchSummary.avgSleep}h · Steps: ${inchSummary.avgSteps.toLocaleString()}`}
-                  </p>
-                </div>
-              </div>
             </section>
 
-            {/* Interactive Daily Nutrition directly accessible on Command Center */}
-            <NutritionView
-              foodLogs={foodLogs}
-              onAddFoodLog={handleAddFoodLog}
-              onRemoveFoodLog={handleRemoveFoodLog}
-              waterOz={waterOz}
-              onUpdateWaterOz={setWaterOz}
-              activeTargets={activeTargets}
-              onUpdateTargets={setActiveTargets}
-              onCreditMacroDay={handleCreditMacroDay}
-              macroDayCreditedToday={macroDayCreditedToday}
-            />
-          </>
+            {/* 4 Bubbly Daily Snapshot Cards (Uncluttered — No Duplicate Full Page Below!) */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* Card 1: Daily Fuel */}
+              <div className="bg-white border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-xs font-semibold text-pink-600">
+                    <span>Today’s Fuel</span>
+                    <Flame className="w-4 h-4" />
+                  </div>
+                  <p className="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-2">
+                    {nutritionStatus.totals.calories} <span className="text-sm font-normal text-slate-400">/ {activeTargets.calories} cal</span>
+                  </p>
+                  <p className="text-xs font-mono tabular-nums text-slate-600 mt-1.5">
+                    Protein: <strong>{nutritionStatus.totals.protein}g</strong> / {activeTargets.protein}g
+                  </p>
+                  <p className="text-xs font-mono tabular-nums text-slate-500 mt-0.5">
+                    Carbs: {nutritionStatus.totals.carbs}g · Fats: {nutritionStatus.totals.fats}g
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSelectTab('nutrition')}
+                  className="w-full py-2 px-3 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold transition-colors"
+                >
+                  Open Food Picker
+                </button>
+              </div>
+
+              {/* Card 2: 120 oz Water Quick-Tap */}
+              <div className="bg-white border border-teal-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-xs font-semibold text-teal-600">
+                    <span>120 oz Water Goal</span>
+                    <Droplets className="w-4 h-4" />
+                  </div>
+                  <p className="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-2">
+                    {waterOz} <span className="text-sm font-normal text-slate-400">/ {activeTargets.waterOz} oz</span>
+                  </p>
+                  <div className="w-full h-2 bg-teal-100 rounded-full overflow-hidden mt-2.5">
+                    <div
+                      className="h-full bg-gradient-to-r from-teal-400 to-pink-400 transition-transform duration-150 origin-left"
+                      style={{ width: `${waterPct}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[8, 16, 24].map((oz) => (
+                    <button
+                      key={oz}
+                      type="button"
+                      onClick={() => setWaterOz((prev) => prev + oz)}
+                      className="py-1.5 px-2 rounded-xl bg-teal-500 hover:bg-teal-600 text-white text-xs font-mono font-bold transition-colors"
+                    >
+                      +{oz}oz
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card 3: Workouts */}
+              <div className="bg-white border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-xs font-semibold text-pink-600">
+                    <span>4-Day Split</span>
+                    <Dumbbell className="w-4 h-4" />
+                  </div>
+                  <p className="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-2">
+                    {completedSessionsThisWeek.length} <span className="text-sm font-normal text-slate-400">logged this week</span>
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1.5">
+                    Upper / Lower split with left-ankle warm-ups & swaps built in.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSelectTab('workouts')}
+                  className="w-full py-2 px-3 rounded-2xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold transition-colors"
+                >
+                  View Workout Plan
+                </button>
+              </div>
+
+              {/* Card 4: Inches & Energy */}
+              <div className="bg-white border border-teal-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-xs font-semibold text-teal-600">
+                    <span>Inches & Energy</span>
+                    <Ruler className="w-4 h-4" />
+                  </div>
+                  <p className="text-2xl font-bold font-mono tabular-nums text-teal-600 mt-2">
+                    {measurements.length < 2 ? '0.0 in' : `${inchSummary.totalInchesDelta} in`}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1.5">
+                    {measurements.length === 0
+                      ? 'Log your starting measurements anytime.'
+                      : `Energy: ${inchSummary.avgEnergy}/10 · Sleep: ${inchSummary.avgSleep}h`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSelectTab('goals')}
+                  className="w-full py-2 px-3 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold transition-colors"
+                >
+                  Log Check-In
+                </button>
+              </div>
+            </section>
+          </div>
         )}
 
         {activeTab === 'workouts' && (
@@ -665,33 +687,33 @@ export default function App() {
         )}
       </main>
 
-      {/* Quiet Footer */}
-      <footer className="border-t border-teal-200/80 bg-white/90 px-6 py-5 mt-12">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+      {/* Quiet, Concise Footer */}
+      <footer className="border-t border-pink-200/60 bg-white/80 px-6 py-5 mt-12">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <span>
-            <strong className="text-pink-600">The Sparkly Drow</strong> — 4-Day Upper/Lower Split (Left Ankle Protected) · 2,118 kcal / 129P / 282C / 60F · 120 oz Water · Automatic 12:00 AM Reset
+            <strong className="text-pink-600">The Sparkly Drow</strong> · 2,118 cal · 129g Protein · 120 oz Water · Resets at 12:00 AM
           </span>
-          <div className="flex items-center gap-4 font-medium">
+          <div className="flex items-center gap-5 font-semibold">
             <button
               type="button"
               onClick={() => handleSelectTab('workouts')}
-              className="text-teal-700 hover:text-pink-600 transition-colors"
+              className="text-teal-600 hover:text-pink-600 transition-colors"
             >
               Workouts
             </button>
             <button
               type="button"
               onClick={() => handleSelectTab('nutrition')}
-              className="text-teal-700 hover:text-pink-600 transition-colors"
+              className="text-teal-600 hover:text-pink-600 transition-colors"
             >
               Nutrition
             </button>
             <button
               type="button"
               onClick={() => handleSelectTab('goals')}
-              className="text-teal-700 hover:text-pink-600 transition-colors"
+              className="text-teal-600 hover:text-pink-600 transition-colors"
             >
-              Inches & Pillars
+              Progress & Guide
             </button>
           </div>
         </div>
