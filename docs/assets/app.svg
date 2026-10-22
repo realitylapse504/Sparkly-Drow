@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14b8a6" />
+      <stop offset="55%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="sparkle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fce7f3" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#bg)" />
+  <circle cx="256" cy="256" r="176" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="10" />
+  <!-- Central 4-point sparkle -->
+  <path d="M256 96 C270 190 322 242 416 256 C322 270 270 322 256 416 C242 322 190 270 96 256 C190 242 242 190 256 96 Z" fill="url(#sparkle)" />
+  <!-- Top-right mini sparkle -->
+  <path d="M380 112 C385 138 398 151 424 156 C398 161 385 174 380 200 C375 174 362 161 336 156 C362 151 375 138 380 112 Z" fill="#fbcfe8" />
+  <!-- Bottom-left mini sparkle -->
+  <path d="M140 324 C144 344 154 354 174 358 C154 362 144 372 140 392 C136 372 126 362 106 358 C126 354 136 344 140 324 Z" fill="#99f6e4" />
+</svg>

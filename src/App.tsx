@@ -21,7 +21,8 @@ import {
 import { WorkoutsView } from './components/WorkoutsView';
 import { NutritionView } from './components/NutritionView';
 import { GoalsAndPillarsView } from './components/GoalsAndPillarsView';
-import { Check, Flame, Droplets, Dumbbell, RotateCcw, Clock, Ruler, ArrowRight } from 'lucide-react';
+import { PWAInstallButton, OfflineIndicator } from './components/PWAInstallButton';
+import { Check, Flame, Droplets, Dumbbell, RotateCcw, Clock, Ruler, ArrowRight, Sparkles } from 'lucide-react';
 
 type ActiveTab = 'dashboard' | 'workouts' | 'nutrition' | 'goals';
 
@@ -259,9 +260,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col text-slate-900">
-      {/* Strict 3-Zone Top Bar Contract — Bubbly Turquoise & Pink */}
-      <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-pink-200/70 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-8">
+      {/* Strict 3-Zone Top Bar Contract — Desktop & Mobile App Header */}
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-pink-200/70 px-4 sm:px-6 py-3.5">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 sm:gap-8">
           {/* Zone 1: Brand Wordmark */}
           <a
             href="#top"
@@ -269,12 +270,12 @@ export default function App() {
               e.preventDefault();
               handleSelectTab('dashboard');
             }}
-            className="text-xl font-bold tracking-tight bg-gradient-to-r from-teal-500 via-pink-500 to-teal-500 bg-clip-text text-transparent whitespace-nowrap shrink-0"
+            className="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-teal-500 via-pink-500 to-teal-500 bg-clip-text text-transparent whitespace-nowrap shrink-0"
           >
             The Sparkly Drow
           </a>
 
-          {/* Zone 2: 4 Concise Nav Links */}
+          {/* Zone 2: 4 Concise Nav Links (Desktop) */}
           <nav aria-label="Primary Navigation" className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
             {(
               [
@@ -299,47 +300,24 @@ export default function App() {
             ))}
           </nav>
 
-          {/* Zone 3: 1 Primary Action */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Zone 3: Install App + Reset Day */}
+          <div className="flex items-center gap-2 shrink-0">
+            <PWAInstallButton />
             <button
               type="button"
               onClick={() => performDailyMidnightReset(getLocalDateString())}
-              className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-600 rounded-2xl hover:from-pink-600 hover:to-pink-700 transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs"
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-600 rounded-2xl hover:from-pink-600 hover:to-pink-700 transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset Day
+              <span className="hidden sm:inline">Reset Day</span>
+              <span className="sm:hidden">Reset</span>
             </button>
           </div>
         </div>
-
-        {/* Mobile Secondary Tab Bar */}
-        <div className="flex md:hidden items-center gap-2 overflow-x-auto pt-3 mt-3 border-t border-pink-100">
-          {(
-            [
-              { id: 'dashboard', label: 'Today' },
-              { id: 'workouts', label: 'Workouts' },
-              { id: 'nutrition', label: 'Nutrition' },
-              { id: 'goals', label: 'Progress' },
-            ] as const
-          ).map((nav) => (
-            <button
-              key={nav.id}
-              type="button"
-              onClick={() => handleSelectTab(nav.id)}
-              className={`px-3.5 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap shrink-0 ${
-                activeTab === nav.id
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-pink-50 text-pink-800'
-              }`}
-            >
-              {nav.label}
-            </button>
-          ))}
-        </div>
       </header>
 
-      {/* Main Content Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8 space-y-8">
+      {/* Main Content Container (padded at bottom on mobile for native app dock) */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-24 md:pb-8 space-y-6 sm:space-y-8">
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
             {/* Airy, Upbeat Hero Card */}
@@ -687,8 +665,44 @@ export default function App() {
         )}
       </main>
 
-      {/* Quiet, Concise Footer */}
-      <footer className="border-t border-pink-200/60 bg-white/80 px-6 py-5 mt-12">
+      {/* Native Mobile App Bottom Navigation Dock (< 768px) */}
+      <nav
+        aria-label="Mobile App Navigation"
+        className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 backdrop-blur-md border-t border-pink-200/80 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
+      >
+        <div className="grid grid-cols-4 gap-1 max-w-md mx-auto">
+          {(
+            [
+              { id: 'dashboard', label: 'Today', Icon: Sparkles },
+              { id: 'workouts', label: 'Workouts', Icon: Dumbbell },
+              { id: 'nutrition', label: 'Nutrition', Icon: Flame },
+              { id: 'goals', label: 'Progress', Icon: Ruler },
+            ] as const
+          ).map(({ id, label, Icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => handleSelectTab(id)}
+                className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl transition-all ${
+                  active
+                    ? 'bg-gradient-to-r from-teal-500/15 to-pink-500/15 text-pink-600 font-bold'
+                    : 'text-slate-500 hover:text-teal-600 font-medium'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${active ? 'text-pink-500' : 'text-teal-600'}`} />
+                <span className="text-[11px] mt-0.5 leading-tight whitespace-nowrap">{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <OfflineIndicator />
+
+      {/* Quiet, Concise Desktop Footer */}
+      <footer className="hidden md:block border-t border-pink-200/60 bg-white/80 px-6 py-5 mt-12">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <span>
             <strong className="text-pink-600">The Sparkly Drow</strong> · 2,118 cal · 129g Protein · 120 oz Water · Resets at 12:00 AM
