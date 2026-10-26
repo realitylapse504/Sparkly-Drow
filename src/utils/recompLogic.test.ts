@@ -8,7 +8,9 @@ import {
   evaluateWeeklyKeysToSuccess,
   calculateCustomRecompMacros,
   applyMidnightResetIfNeeded,
+  applyWeeklyResetIfNeeded,
   getLocalDateString,
+  getWeekStartDateString,
   getTimeUntilMidnight,
   type FoodLogEntry,
   type BodyMeasurementEntry,
@@ -18,6 +20,8 @@ import {
   createCustomWorkoutPlan,
   resolveWeeklySchedule,
   buildDefaultSetLogs,
+  getDailyQuestsForDate,
+  createCustomDailyQuest,
 } from '../data/programData';
 
 test('prescribed targets match exact nutrition brief (2118 kcal, 129P, 282C, 60F, <40 sugar, <20 sat fat, 120oz water)', () => {
@@ -186,7 +190,7 @@ test('calculateCustomRecompMacros calculates 15-20% deficit and 0.8-1.0g/lb prot
   assert.equal(custom.waterOz, 120);
 });
 
-test('applyMidnightResetIfNeeded clears daily food, water, warm-ups, LISS, and set checks when date advances past midnight', () => {
+test('applyMidnightResetIfNeeded clears daily food, water, warm-ups, daily quests, LISS, and set checks when date advances past midnight', () => {
   const populatedDay = {
     lastActiveDate: '2026-10-21',
     foodLogs: [
@@ -210,6 +214,8 @@ test('applyMidnightResetIfNeeded clears daily food, water, warm-ups, LISS, and s
     flatShoesVerified: true,
     lissMinutesToday: 30,
     setCompletionMap: { ua_1_set_1: true, ua_1_set_2: true },
+    completedQuestIdsToday: ['dq_spine_hip_opener', 'dq_glute_core_spark'],
+    questShuffleIndex: 2,
   };
 
   // Same date -> no reset
@@ -217,6 +223,7 @@ test('applyMidnightResetIfNeeded clears daily food, water, warm-ups, LISS, and s
   assert.equal(sameDayResult.didReset, false);
   assert.equal(sameDayResult.state.waterOz, 96);
   assert.equal(sameDayResult.state.foodLogs.length, 1);
+  assert.equal(sameDayResult.state.completedQuestIdsToday?.length, 2);
 
   // Next day (past midnight) -> full daily reset
   const nextDayResult = applyMidnightResetIfNeeded(populatedDay, '2026-10-22');
@@ -229,6 +236,8 @@ test('applyMidnightResetIfNeeded clears daily food, water, warm-ups, LISS, and s
   assert.equal(nextDayResult.state.lissMinutesToday, 0);
   assert.equal(nextDayResult.state.ankleWarmupChecks.ankle_circles, false);
   assert.equal(nextDayResult.state.setCompletionMap.ua_1_set_1, false);
+  assert.equal(nextDayResult.state.completedQuestIdsToday?.length, 0);
+  assert.equal(nextDayResult.state.questShuffleIndex, 0);
 });
 
 test('getLocalDateString and getTimeUntilMidnight return properly formatted values', () => {
@@ -285,4 +294,70 @@ test('createCustomWorkoutPlan and resolveWeeklySchedule persist custom workouts 
   assert.equal(sunSlot?.workoutId, 'upper_a');
   assert.equal(sunSlot?.session, 'Upper Body A');
 });
+
+test('getDailyQuestsForDate and createCustomDailyQuest provide warm-up degree quests with shuffle and custom additions', () => {
+  const questsDay1 = getDailyQuestsForDate('2026-10-26', 0);
+  assert.equal(questsDay1.length, 3);
+  assert.ok(questsDay1[0].title.length > 0);
+  assert.ok(questsDay1[0].prescription.length > 0);
+
+  const shuffled = getDailyQuestsForDate('2026-10-26', 1);
+  assert.equal(shuffled.length, 3);
+  assert.notEqual(questsDay1[0].id, shuffled[0].id);
+
+  const customQuest = createCustomDailyQuest({
+    title: 'Wrist & Scapula Warm-Up',
+    prescription: '10 wrist circles + 12 band pull-aparts',
+    durationLabel: '3 mins',
+    category: 'Mobility Flow',
+  });
+  assert.equal(customQuest.isCustom, true);
+  const withCustom = getDailyQuestsForDate('2026-10-26', 0, [customQuest]);
+  assert.equal(withCustom.length, 4);
+  assert.equal(withCustom[3].title, 'Wrist & Scapula Warm-Up');
+});
+
+test('getWeekStartDateString and applyWeeklyResetIfNeeded reset completed workouts and weekly keys on new Monday weeks', () => {
+  // Oct 25, 2026 is a Sunday -> Monday of that week is 2026-10-19
+  const sun = new Date(2026, 9, 25, 14, 0, 0);
+  assert.equal(getWeekStartDateString(sun), '2026-10-19');
+
+  // Oct 26, 2026 is a Monday -> Monday of that week is 2026-10-26
+  const mon = new Date(2026, 9, 26, 8, 0, 0);
+  assert.equal(getWeekStartDateString(mon), '2026-10-26');
+
+  const activeWeekState = {
+    lastActiveWeekStart: '2026-10-19',
+    completedSessionsThisWeek: ['upper_a', 'lower_a', 'full_body_session'],
+    weeklyConsistency: {
+      weeklyFullBodyCompleted: true,
+      programmedWorkoutsCompleted: 2,
+      macroDaysTrackedAndHit: 5,
+      cheatMode: 'one_day' as const,
+      cheatUsedCount: 1,
+    },
+    weeklyHistory: [],
+  };
+
+  // Same week -> no reset
+  const sameWeek = applyWeeklyResetIfNeeded(activeWeekState, '2026-10-19', '2026-10-24');
+  assert.equal(sameWeek.didReset, false);
+  assert.equal(sameWeek.state.completedSessionsThisWeek.length, 3);
+
+  // New week (Monday 2026-10-26) -> resets weekly workouts & keys and archives previous week
+  const newWeek = applyWeeklyResetIfNeeded(activeWeekState, '2026-10-26', '2026-10-26');
+  assert.equal(newWeek.didReset, true);
+  assert.equal(newWeek.state.lastActiveWeekStart, '2026-10-26');
+  assert.equal(newWeek.state.completedSessionsThisWeek.length, 0);
+  assert.equal(newWeek.state.weeklyConsistency.weeklyFullBodyCompleted, false);
+  assert.equal(newWeek.state.weeklyConsistency.programmedWorkoutsCompleted, 0);
+  assert.equal(newWeek.state.weeklyConsistency.macroDaysTrackedAndHit, 0);
+  assert.equal(newWeek.state.weeklyConsistency.cheatUsedCount, 0);
+  assert.equal(newWeek.state.weeklyConsistency.cheatMode, 'one_day');
+  assert.equal(newWeek.state.weeklyHistory.length, 1);
+  assert.equal(newWeek.state.weeklyHistory[0].weekStartDate, '2026-10-19');
+  assert.equal(newWeek.state.weeklyHistory[0].workoutsCompletedCount, 3);
+  assert.equal(newWeek.state.weeklyHistory[0].keysMetCount, 3);
+});
+
 

@@ -29,6 +29,7 @@ interface WorkoutsViewProps {
   scheduleOverrides: Record<string, string>;
   onUpdateScheduleDay: (day: string, workoutOrRestId: string) => void;
   onResetScheduleOverrides: () => void;
+  onResetWeek: () => void;
   setLogs: Record<string, SetLogEntry>;
   onUpdateSetLogs: React.Dispatch<React.SetStateAction<Record<string, SetLogEntry>>>;
   completedSessionsThisWeek: string[];
@@ -61,6 +62,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
   scheduleOverrides,
   onUpdateScheduleDay,
   onResetScheduleOverrides,
+  onResetWeek,
   setLogs,
   onUpdateSetLogs,
   completedSessionsThisWeek,
@@ -239,10 +241,20 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               Weekly Split Schedule
             </h2>
             <p className="text-xs text-slate-500">
-              Goal: 1x Full-Body + 2–4 Split Days · Use the dropdown on any day to schedule a saved workout!
+              Goal: 1x Full-Body + 2–4 Split Days · Auto-resets every Monday for a fresh week!
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {completedSessionsThisWeek.length > 0 && (
+              <button
+                type="button"
+                onClick={onResetWeek}
+                className="px-3 py-2 rounded-2xl border border-pink-200 bg-pink-50/70 hover:bg-pink-100 text-xs font-bold text-pink-700 flex items-center gap-1 whitespace-nowrap"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset Week ({completedSessionsThisWeek.length} Done)
+              </button>
+            )}
             {hasScheduleOverrides && (
               <button
                 type="button"

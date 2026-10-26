@@ -5,11 +5,14 @@ import {
   calculateInchChangeSummary,
   evaluateWeeklyKeysToSuccess,
   getLocalDateString,
+  getWeekStartDateString,
   getTimeUntilMidnight,
   applyMidnightResetIfNeeded,
+  applyWeeklyResetIfNeeded,
   type FoodLogEntry,
   type BodyMeasurementEntry,
   type WeeklyConsistencyState,
+  type CompletedWeekSummary,
   type MacroTargets,
 } from './utils/recompLogic';
 import {
@@ -18,12 +21,15 @@ import {
   INITIAL_WEEKLY_CONSISTENCY,
   WORKOUT_PLANS,
   buildDefaultSetLogs,
+  getDailyQuestsForDate,
   type WorkoutDayPlan,
   type SetLogEntry,
+  type DailyWarmupQuest,
 } from './data/programData';
 import { WorkoutsView } from './components/WorkoutsView';
 import { NutritionView } from './components/NutritionView';
 import { GoalsAndPillarsView } from './components/GoalsAndPillarsView';
+import { DailyQuestsSection } from './components/DailyQuestsSection';
 import { PWAInstallButton, OfflineIndicator } from './components/PWAInstallButton';
 import { Check, Flame, Droplets, Dumbbell, RotateCcw, Clock, Ruler, ArrowRight, Sparkles } from 'lucide-react';
 
@@ -44,6 +50,7 @@ function getDefaultWorkoutIdForToday(): WorkoutDayPlan['id'] {
 
 function loadHydratedAppState() {
   const todayStr = getLocalDateString();
+  const currentWeekStart = getWeekStartDateString();
   const defaultWarmup = {
     ankle_circles: false,
     wall_stretch: false,
@@ -60,6 +67,7 @@ function loadHydratedAppState() {
 
     const parsed = JSON.parse(saved);
     const savedDate = parsed.lastActiveDate || todayStr;
+    const savedWeekStart = parsed.lastActiveWeekStart || currentWeekStart;
     const savedCustomWorkouts: WorkoutDayPlan[] = Array.isArray(parsed.customWorkouts)
       ? parsed.customWorkouts
       : [];
@@ -67,6 +75,9 @@ function loadHydratedAppState() {
       parsed.scheduleOverrides && typeof parsed.scheduleOverrides === 'object'
         ? parsed.scheduleOverrides
         : {};
+    const savedCustomDailyQuests: DailyWarmupQuest[] = Array.isArray(parsed.customDailyQuests)
+      ? parsed.customDailyQuests
+      : [];
 
     const defaultSetLogs = buildDefaultSetLogs([...WORKOUT_PLANS, ...savedCustomWorkouts]);
     const rawSetLogs: Record<string, SetLogEntry> = { ...defaultSetLogs };
@@ -105,6 +116,11 @@ function loadHydratedAppState() {
         lissMinutesToday:
           typeof parsed.lissMinutesToday === 'number' ? parsed.lissMinutesToday : 0,
         setCompletionMap,
+        completedQuestIdsToday: Array.isArray(parsed.completedQuestIdsToday)
+          ? parsed.completedQuestIdsToday
+          : [],
+        questShuffleIndex:
+          typeof parsed.questShuffleIndex === 'number' ? parsed.questShuffleIndex : 0,
       },
       todayStr
     );
@@ -117,14 +133,37 @@ function loadHydratedAppState() {
       };
     }
 
+    const weeklyResetCheck = applyWeeklyResetIfNeeded(
+      {
+        lastActiveWeekStart: savedWeekStart,
+        completedSessionsThisWeek: Array.isArray(parsed.completedSessionsThisWeek)
+          ? parsed.completedSessionsThisWeek
+          : [],
+        weeklyConsistency: parsed.weeklyConsistency
+          ? { ...INITIAL_WEEKLY_CONSISTENCY, ...parsed.weeklyConsistency }
+          : INITIAL_WEEKLY_CONSISTENCY,
+        weeklyHistory: Array.isArray(parsed.weeklyHistory) ? parsed.weeklyHistory : [],
+      },
+      currentWeekStart,
+      todayStr
+    );
+
     return {
       lastActiveDate: resetCheck.state.lastActiveDate,
+      lastActiveWeekStart: weeklyResetCheck.state.lastActiveWeekStart,
       foodLogs: resetCheck.state.foodLogs,
       waterOz: resetCheck.state.waterOz,
       macroDayCreditedToday: resetCheck.state.macroDayCreditedToday,
       ankleWarmupChecks: resetCheck.state.ankleWarmupChecks,
       flatShoesVerified: resetCheck.state.flatShoesVerified,
       lissMinutesToday: resetCheck.state.lissMinutesToday,
+      completedQuestIdsToday: resetCheck.state.completedQuestIdsToday ?? [],
+      questShuffleIndex: resetCheck.state.questShuffleIndex ?? 0,
+      customDailyQuests: savedCustomDailyQuests,
+      totalLifetimeQuestsCompleted:
+        typeof parsed.totalLifetimeQuestsCompleted === 'number'
+          ? parsed.totalLifetimeQuestsCompleted
+          : 0,
       setLogs: hydratedSetLogs,
       activeWorkoutId:
         (parsed.activeWorkoutId as WorkoutDayPlan['id']) || getDefaultWorkoutIdForToday(),
@@ -135,12 +174,9 @@ function loadHydratedAppState() {
       measurements: Array.isArray(parsed.measurements)
         ? parsed.measurements
         : INITIAL_MEASUREMENT_LOGS,
-      weeklyConsistency: parsed.weeklyConsistency
-        ? { ...INITIAL_WEEKLY_CONSISTENCY, ...parsed.weeklyConsistency }
-        : INITIAL_WEEKLY_CONSISTENCY,
-      completedSessionsThisWeek: Array.isArray(parsed.completedSessionsThisWeek)
-        ? parsed.completedSessionsThisWeek
-        : [],
+      weeklyConsistency: weeklyResetCheck.state.weeklyConsistency,
+      completedSessionsThisWeek: weeklyResetCheck.state.completedSessionsThisWeek,
+      weeklyHistory: weeklyResetCheck.state.weeklyHistory,
       lungeSwappedToBss:
         typeof parsed.lungeSwappedToBss === 'boolean' ? parsed.lungeSwappedToBss : false,
       lissModality:
@@ -162,6 +198,9 @@ export default function App() {
   const [lastActiveDate, setLastActiveDate] = useState<string>(
     () => initialHydrated?.lastActiveDate ?? getLocalDateString()
   );
+  const [lastActiveWeekStart, setLastActiveWeekStart] = useState<string>(
+    () => initialHydrated?.lastActiveWeekStart ?? getWeekStartDateString()
+  );
   const [midnightCountdown, setMidnightCountdown] = useState<string>(
     () => getTimeUntilMidnight().formatted
   );
@@ -182,6 +221,9 @@ export default function App() {
   );
   const [completedSessionsThisWeek, setCompletedSessionsThisWeek] = useState<string[]>(
     () => initialHydrated?.completedSessionsThisWeek ?? []
+  );
+  const [weeklyHistory, setWeeklyHistory] = useState<CompletedWeekSummary[]>(
+    () => initialHydrated?.weeklyHistory ?? []
   );
   const [activeWorkoutId, setActiveWorkoutId] = useState<WorkoutDayPlan['id']>(
     () => initialHydrated?.activeWorkoutId ?? getDefaultWorkoutIdForToday()
@@ -219,6 +261,20 @@ export default function App() {
     () => initialHydrated?.scheduleOverrides ?? {}
   );
 
+  // Daily Warm-Up Quests states
+  const [completedQuestIdsToday, setCompletedQuestIdsToday] = useState<string[]>(
+    () => initialHydrated?.completedQuestIdsToday ?? []
+  );
+  const [questShuffleIndex, setQuestShuffleIndex] = useState<number>(
+    () => initialHydrated?.questShuffleIndex ?? 0
+  );
+  const [customDailyQuests, setCustomDailyQuests] = useState<DailyWarmupQuest[]>(
+    () => initialHydrated?.customDailyQuests ?? []
+  );
+  const [totalLifetimeQuestsCompleted, setTotalLifetimeQuestsCompleted] = useState<number>(
+    () => initialHydrated?.totalLifetimeQuestsCompleted ?? 0
+  );
+
   const performDailyMidnightReset = useCallback((newDateStr: string) => {
     setLastActiveDate(newDateStr);
     setFoodLogs([]);
@@ -231,6 +287,8 @@ export default function App() {
     });
     setFlatShoesVerified(false);
     setLissMinutesToday(0);
+    setCompletedQuestIdsToday([]);
+    setQuestShuffleIndex(0);
     setSetLogs((prev) => {
       const next: Record<string, SetLogEntry> = {};
       for (const [k, v] of Object.entries(prev)) {
@@ -240,15 +298,62 @@ export default function App() {
     });
   }, []);
 
-  // Live 1-second Midnight Reset Watcher & Countdown
+  const performWeeklyReset = useCallback(
+    (newWeekStartStr: string = getWeekStartDateString()) => {
+      setWeeklyHistory((prevHistory) => {
+        const hadActivity =
+          completedSessionsThisWeek.length > 0 ||
+          weeklyConsistency.weeklyFullBodyCompleted ||
+          weeklyConsistency.programmedWorkoutsCompleted > 0 ||
+          weeklyConsistency.macroDaysTrackedAndHit > 0;
+        if (!hadActivity) return prevHistory;
+        const evalPrev = evaluateWeeklyKeysToSuccess(weeklyConsistency);
+        return [
+          {
+            weekStartDate: lastActiveWeekStart,
+            completedAtDate: getLocalDateString(),
+            workoutsCompletedCount: completedSessionsThisWeek.length,
+            fullBodyCompleted: weeklyConsistency.weeklyFullBodyCompleted,
+            macroDaysHit: weeklyConsistency.macroDaysTrackedAndHit,
+            keysMetCount: evalPrev.totalKeysMet,
+          },
+          ...prevHistory,
+        ].slice(0, 24);
+      });
+
+      setLastActiveWeekStart(newWeekStartStr);
+      setCompletedSessionsThisWeek([]);
+      setWeeklyConsistency((prev) => ({
+        weeklyFullBodyCompleted: false,
+        programmedWorkoutsCompleted: 0,
+        macroDaysTrackedAndHit: 0,
+        cheatMode: prev.cheatMode || 'two_meals',
+        cheatUsedCount: 0,
+      }));
+      setSetLogs((prev) => {
+        const next: Record<string, SetLogEntry> = {};
+        for (const [k, v] of Object.entries(prev)) {
+          next[k] = { ...v, completed: false };
+        }
+        return next;
+      });
+    },
+    [completedSessionsThisWeek, weeklyConsistency, lastActiveWeekStart]
+  );
+
+  // Live 1-second Midnight & Monday Weekly Reset Watcher
   useEffect(() => {
     const checkClock = () => {
       const now = new Date();
       const currentDateStr = getLocalDateString(now);
+      const currentWeekStartStr = getWeekStartDateString(now);
       setMidnightCountdown(getTimeUntilMidnight(now).formatted);
 
       if (currentDateStr !== lastActiveDate) {
         performDailyMidnightReset(currentDateStr);
+      }
+      if (currentWeekStartStr !== lastActiveWeekStart) {
+        performWeeklyReset(currentWeekStartStr);
       }
     };
 
@@ -266,7 +371,7 @@ export default function App() {
       window.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', checkClock);
     };
-  }, [lastActiveDate, performDailyMidnightReset]);
+  }, [lastActiveDate, lastActiveWeekStart, performDailyMidnightReset, performWeeklyReset]);
 
   useEffect(() => {
     try {
@@ -274,6 +379,7 @@ export default function App() {
         STORAGE_KEY,
         JSON.stringify({
           lastActiveDate,
+          lastActiveWeekStart,
           foodLogs,
           waterOz,
           activeTargets,
@@ -283,6 +389,7 @@ export default function App() {
           measurements,
           weeklyConsistency,
           completedSessionsThisWeek,
+          weeklyHistory,
           activeWorkoutId,
           setLogs,
           lungeSwappedToBss,
@@ -290,6 +397,10 @@ export default function App() {
           lissMinutesToday,
           customWorkouts,
           scheduleOverrides,
+          completedQuestIdsToday,
+          questShuffleIndex,
+          customDailyQuests,
+          totalLifetimeQuestsCompleted,
         })
       );
     } catch {
@@ -297,6 +408,7 @@ export default function App() {
     }
   }, [
     lastActiveDate,
+    lastActiveWeekStart,
     foodLogs,
     waterOz,
     activeTargets,
@@ -306,6 +418,7 @@ export default function App() {
     measurements,
     weeklyConsistency,
     completedSessionsThisWeek,
+    weeklyHistory,
     activeWorkoutId,
     setLogs,
     lungeSwappedToBss,
@@ -313,12 +426,47 @@ export default function App() {
     lissMinutesToday,
     customWorkouts,
     scheduleOverrides,
+    completedQuestIdsToday,
+    questShuffleIndex,
+    customDailyQuests,
+    totalLifetimeQuestsCompleted,
   ]);
 
   const nutritionStatus = calculateDailyNutritionStatus(foodLogs, activeTargets);
   const inchSummary = calculateInchChangeSummary(measurements);
   const keysStatus = evaluateWeeklyKeysToSuccess(weeklyConsistency);
   const waterPct = Math.min(100, Math.round((waterOz / activeTargets.waterOz) * 100));
+  const dailyQuestsForToday = getDailyQuestsForDate(
+    lastActiveDate,
+    questShuffleIndex,
+    customDailyQuests
+  );
+
+  const handleToggleDailyQuest = (questId: string) => {
+    setCompletedQuestIdsToday((prev) => {
+      const alreadyCompleted = prev.includes(questId);
+      if (alreadyCompleted) {
+        setTotalLifetimeQuestsCompleted((count) => Math.max(0, count - 1));
+        return prev.filter((id) => id !== questId);
+      } else {
+        setTotalLifetimeQuestsCompleted((count) => count + 1);
+        return [...prev, questId];
+      }
+    });
+  };
+
+  const handleShuffleDailyQuests = () => {
+    setQuestShuffleIndex((prev) => prev + 1);
+  };
+
+  const handleAddCustomDailyQuest = (quest: DailyWarmupQuest) => {
+    setCustomDailyQuests((prev) => [...prev, quest]);
+  };
+
+  const handleDeleteCustomDailyQuest = (questId: string) => {
+    setCustomDailyQuests((prev) => prev.filter((q) => q.id !== questId));
+    setCompletedQuestIdsToday((prev) => prev.filter((id) => id !== questId));
+  };
 
   const handleAddFoodLog = (entry: Omit<FoodLogEntry, 'id' | 'timestamp'>) => {
     const now = new Date();
@@ -507,7 +655,7 @@ export default function App() {
                       Strong, Fueled & Feeling Good
                     </h1>
                     <p className="text-sm text-slate-600 leading-relaxed max-w-md">
-                      Your daily spot for ankle-friendly lifts, 2,118 cal macro goals, and 120 oz of water. Everything resets fresh at midnight!
+                      Your daily spot for warm-up quests, ankle-friendly lifts, 2,118 cal macro goals, and 120 oz of water. Daily logs reset at midnight and weekly workouts reset every Monday!
                     </p>
                   </div>
 
@@ -538,14 +686,27 @@ export default function App() {
 
                 {/* Right 6 Columns: Bubbly Weekly Wins (Keys to Success) */}
                 <div className="lg:col-span-6 bg-gradient-to-br from-teal-50/90 via-white to-pink-50/90 border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
                       <h2 className="text-base font-bold text-slate-900">This Week’s Keys to Success</h2>
-                      <p className="text-xs text-slate-500">Three simple habits that drive results</p>
+                      <p className="text-xs text-slate-500">
+                        Week of {lastActiveWeekStart} · Auto-resets Monday
+                        {weeklyHistory.length > 0 && ` · ${weeklyHistory.length} wks logged`}
+                      </p>
                     </div>
-                    <span className="text-xs font-mono font-bold text-pink-600 tabular-nums">
-                      {keysStatus.totalKeysMet} / 3 Hit
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-mono font-bold text-pink-600 tabular-nums">
+                        {keysStatus.totalKeysMet} / 3 Hit
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => performWeeklyReset(getWeekStartDateString())}
+                        className="px-2.5 py-1 rounded-xl border border-teal-200 bg-white hover:bg-teal-50 text-teal-800 text-[11px] font-bold flex items-center gap-1 transition-colors"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        Reset Week
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-3 text-xs">
@@ -678,6 +839,17 @@ export default function App() {
                 </div>
               </div>
             </section>
+
+            {/* Daily Warm-Up Quests Section */}
+            <DailyQuestsSection
+              quests={dailyQuestsForToday}
+              completedQuestIdsToday={completedQuestIdsToday}
+              totalLifetimeQuestsCompleted={totalLifetimeQuestsCompleted}
+              onToggleQuest={handleToggleDailyQuest}
+              onShuffleQuests={handleShuffleDailyQuests}
+              onAddCustomQuest={handleAddCustomDailyQuest}
+              onDeleteCustomQuest={handleDeleteCustomDailyQuest}
+            />
 
             {/* 4 Bubbly Daily Snapshot Cards (Uncluttered — No Duplicate Full Page Below!) */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -815,6 +987,7 @@ export default function App() {
             scheduleOverrides={scheduleOverrides}
             onUpdateScheduleDay={handleUpdateScheduleDay}
             onResetScheduleOverrides={handleResetScheduleOverrides}
+            onResetWeek={() => performWeeklyReset(getWeekStartDateString())}
           />
         )}
 

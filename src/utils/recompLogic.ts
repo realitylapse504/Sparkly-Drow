@@ -80,6 +80,24 @@ export interface DailyResettableState {
   flatShoesVerified: boolean;
   lissMinutesToday: number;
   setCompletionMap: Record<string, boolean>;
+  completedQuestIdsToday?: string[];
+  questShuffleIndex?: number;
+}
+
+export interface CompletedWeekSummary {
+  weekStartDate: string; // YYYY-MM-DD (Monday)
+  completedAtDate: string;
+  workoutsCompletedCount: number;
+  fullBodyCompleted: boolean;
+  macroDaysHit: number;
+  keysMetCount: number;
+}
+
+export interface WeeklyResettableState {
+  lastActiveWeekStart: string; // YYYY-MM-DD of Monday of the active week
+  completedSessionsThisWeek: string[];
+  weeklyConsistency: WeeklyConsistencyState;
+  weeklyHistory: CompletedWeekSummary[];
 }
 
 export const PRESCRIBED_TARGETS: MacroTargets = {
@@ -108,6 +126,18 @@ export function getLocalDateString(date: Date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Returns the YYYY-MM-DD string for Monday of the week containing `date`.
+ * Ensures weeks consistently roll over every Monday at 12:00 AM local time.
+ */
+export function getWeekStartDateString(date: Date = new Date()): string {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const dayOfWeek = d.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  d.setDate(d.getDate() + diffToMonday);
+  return getLocalDateString(d);
+}
+
 export function getTimeUntilMidnight(now: Date = new Date()): {
   hours: number;
   minutes: number;
@@ -132,7 +162,14 @@ export function applyMidnightResetIfNeeded(
   currentDateStr: string = getLocalDateString()
 ): { state: DailyResettableState; didReset: boolean } {
   if (state.lastActiveDate === currentDateStr) {
-    return { state, didReset: false };
+    return {
+      state: {
+        ...state,
+        completedQuestIdsToday: state.completedQuestIdsToday ?? [],
+        questShuffleIndex: state.questShuffleIndex ?? 0,
+      },
+      didReset: false,
+    };
   }
 
   const resetSetMap: Record<string, boolean> = {};
@@ -155,6 +192,55 @@ export function applyMidnightResetIfNeeded(
       flatShoesVerified: false,
       lissMinutesToday: 0,
       setCompletionMap: resetSetMap,
+      completedQuestIdsToday: [],
+      questShuffleIndex: 0,
+    },
+  };
+}
+
+export function applyWeeklyResetIfNeeded(
+  state: WeeklyResettableState,
+  currentWeekStart: string = getWeekStartDateString(),
+  currentDateStr: string = getLocalDateString()
+): { state: WeeklyResettableState; didReset: boolean } {
+  if (state.lastActiveWeekStart === currentWeekStart) {
+    return { state, didReset: false };
+  }
+
+  const hadActivity =
+    state.completedSessionsThisWeek.length > 0 ||
+    state.weeklyConsistency.weeklyFullBodyCompleted ||
+    state.weeklyConsistency.programmedWorkoutsCompleted > 0 ||
+    state.weeklyConsistency.macroDaysTrackedAndHit > 0;
+
+  const evalPrev = evaluateWeeklyKeysToSuccess(state.weeklyConsistency);
+  const nextHistory: CompletedWeekSummary[] = hadActivity
+    ? [
+        {
+          weekStartDate: state.lastActiveWeekStart,
+          completedAtDate: currentDateStr,
+          workoutsCompletedCount: state.completedSessionsThisWeek.length,
+          fullBodyCompleted: state.weeklyConsistency.weeklyFullBodyCompleted,
+          macroDaysHit: state.weeklyConsistency.macroDaysTrackedAndHit,
+          keysMetCount: evalPrev.totalKeysMet,
+        },
+        ...state.weeklyHistory,
+      ].slice(0, 24)
+    : state.weeklyHistory;
+
+  return {
+    didReset: true,
+    state: {
+      lastActiveWeekStart: currentWeekStart,
+      completedSessionsThisWeek: [],
+      weeklyConsistency: {
+        weeklyFullBodyCompleted: false,
+        programmedWorkoutsCompleted: 0,
+        macroDaysTrackedAndHit: 0,
+        cheatMode: state.weeklyConsistency.cheatMode || 'two_meals',
+        cheatUsedCount: 0,
+      },
+      weeklyHistory: nextHistory,
     },
   };
 }

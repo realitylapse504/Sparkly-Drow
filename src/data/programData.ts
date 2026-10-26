@@ -882,3 +882,145 @@ export const INITIAL_WEEKLY_CONSISTENCY: WeeklyConsistencyState = {
   cheatMode: 'two_meals',
   cheatUsedCount: 0,
 };
+
+export interface DailyWarmupQuest {
+  id: string;
+  title: string;
+  category: 'Mobility Flow' | 'Core & Glute Spark' | 'Ankle & Joint Prep' | 'Light Movement';
+  durationLabel: string;
+  prescription: string;
+  detail: string;
+  timerSeconds?: number;
+  isCustom?: boolean;
+}
+
+export const DAILY_QUEST_POOL: DailyWarmupQuest[] = [
+  {
+    id: 'dq_spine_hip_opener',
+    title: 'Morning Spine & Hip Wake-Up',
+    category: 'Mobility Flow',
+    durationLabel: '3 mins',
+    prescription: '8 Cat-Cows · 6 World’s Greatest Stretch · 20s Deep Squat Hold',
+    detail: 'Gentle warm-up flow to loosen your lower back and hips before starting the day.',
+    timerSeconds: 180,
+  },
+  {
+    id: 'dq_glute_core_spark',
+    title: 'Glute & Core Activation Mini-Set',
+    category: 'Core & Glute Spark',
+    durationLabel: '4 mins',
+    prescription: '12 Glute Bridges · 10 Dead Bugs · 20s Front Plank',
+    detail: 'Fires up your glutes and deep core with zero ankle strain.',
+    timerSeconds: 240,
+  },
+  {
+    id: 'dq_ankle_calf_flow',
+    title: 'Ankle & Tibialis Warm-Up Circuit',
+    category: 'Ankle & Joint Prep',
+    durationLabel: '3 mins',
+    prescription: '10 Ankle Circles/way · 15 Seated Tibialis Raises · 30s Calf Stretch',
+    detail: 'Keeps your left ankle mobile, supported, and warm for lifting or walking.',
+    timerSeconds: 180,
+  },
+  {
+    id: 'dq_posture_shoulder_reset',
+    title: 'Upper Back & Posture Warm-Up',
+    category: 'Mobility Flow',
+    durationLabel: '3 mins',
+    prescription: '12 Wall Slides · 15 Band Pull-Aparts (or Arm Circles) · 30s Chest Opener',
+    detail: 'Opens tight shoulders and primes your upper body for pressing and rowing.',
+    timerSeconds: 180,
+  },
+  {
+    id: 'dq_sunshine_stroll',
+    title: '10-Minute Brisk Warm-Up Walk',
+    category: 'Light Movement',
+    durationLabel: '10 mins',
+    prescription: '10 mins easy flat walk (~1,000 steps)',
+    detail: 'Wakes up your metabolism and chips away at your daily step goal.',
+    timerSeconds: 600,
+  },
+  {
+    id: 'dq_bird_dog_hinge',
+    title: 'Hip Hinge & Stability Primer',
+    category: 'Core & Glute Spark',
+    durationLabel: '4 mins',
+    prescription: '8 Bird-Dogs/side · 12 Bodyweight Good Mornings · 12 Clamshells/side',
+    detail: 'Warms up hamstrings, side glutes, and spinal stabilizers.',
+    timerSeconds: 240,
+  },
+  {
+    id: 'dq_banded_glute_prep',
+    title: 'Lower-Body Warm-Up Pulse',
+    category: 'Core & Glute Spark',
+    durationLabel: '4 mins',
+    prescription: '15 Seated Band Abductions · 12 Pause Glute Bridges · 10 Box Air Squats',
+    detail: 'Ankle-friendly warm-up to get blood flowing to quads and glutes.',
+    timerSeconds: 240,
+  },
+  {
+    id: 'dq_evening_hip_decompress',
+    title: ' Couch-to-Sleep Hip & Back Unwind',
+    category: 'Mobility Flow',
+    durationLabel: '4 mins',
+    prescription: '30s Figure-4 Stretch/side · 30s Child’s Pose · 5 Slow Nasal Breaths',
+    detail: 'Releases hip tension and preps your body for 7–9 hours of recovery sleep.',
+    timerSeconds: 240,
+  },
+  {
+    id: 'dq_post_meal_walk',
+    title: '5-Minute Post-Meal Digestion Walk',
+    category: 'Light Movement',
+    durationLabel: '5 mins',
+    prescription: '5 mins easy stroll after any meal',
+    detail: 'Boosts energy, digestion, and blood sugar balance with zero joint stress.',
+    timerSeconds: 300,
+  },
+];
+
+/**
+ * Deterministically picks 3 varied Daily Warm-Up Quests for a given date + shuffle offset,
+ * plus appends any custom daily quests the user created.
+ */
+export function getDailyQuestsForDate(
+  dateStr: string,
+  shuffleIndex: number = 0,
+  customQuests: DailyWarmupQuest[] = []
+): DailyWarmupQuest[] {
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = (hash * 31 + dateStr.charCodeAt(i)) >>> 0;
+  }
+  const offset = Math.abs(hash + shuffleIndex * 3);
+
+  const picked: DailyWarmupQuest[] = [];
+  const poolLen = DAILY_QUEST_POOL.length;
+  for (let i = 0; i < 3; i++) {
+    const idx = (offset + i * 2) % poolLen;
+    picked.push(DAILY_QUEST_POOL[idx]);
+  }
+
+  return [...picked, ...customQuests];
+}
+
+export function createCustomDailyQuest(input: {
+  title: string;
+  prescription: string;
+  durationLabel?: string;
+  category?: DailyWarmupQuest['category'];
+}): DailyWarmupQuest {
+  const cleanTitle = input.title.trim() || 'Custom Warm-Up Quest';
+  const cleanPrescription = input.prescription.trim() || '2 sets × 10 easy warm-up reps';
+  const cleanDuration = input.durationLabel?.trim() || '3 mins';
+  return {
+    id: `custom_quest_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    title: cleanTitle,
+    category: input.category || 'Mobility Flow',
+    durationLabel: cleanDuration,
+    prescription: cleanPrescription,
+    detail: 'Your custom daily warm-up quest.',
+    timerSeconds: 180,
+    isCustom: true,
+  };
+}
+
