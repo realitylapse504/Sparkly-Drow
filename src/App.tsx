@@ -9,6 +9,7 @@ import {
   getTimeUntilMidnight,
   applyMidnightResetIfNeeded,
   applyWeeklyResetIfNeeded,
+  resetWorkoutSessionForDay,
   type FoodLogEntry,
   type BodyMeasurementEntry,
   type WeeklyConsistencyState,
@@ -501,6 +502,57 @@ export default function App() {
     });
   };
 
+  const handleResetWorkoutDay = useCallback(
+    (workoutId: WorkoutDayPlan['id'] = activeWorkoutId) => {
+      const allPlans = [...WORKOUT_PLANS, ...customWorkouts];
+      const targetPlan = allPlans.find((w) => w.id === workoutId);
+      const exerciseIds = targetPlan ? targetPlan.exercises.map((e) => e.id) : [];
+
+      const currentSetMap: Record<string, boolean> = {};
+      for (const [k, v] of Object.entries(setLogs)) {
+        currentSetMap[k] = Boolean(v.completed);
+      }
+
+      const result = resetWorkoutSessionForDay({
+        workoutId,
+        exerciseIds,
+        completedSessionsThisWeek,
+        weeklyConsistency,
+        setCompletionMap: currentSetMap,
+      });
+
+      setCompletedSessionsThisWeek(result.completedSessionsThisWeek);
+      setWeeklyConsistency(result.weeklyConsistency);
+      setSetLogs((prev) => {
+        const next: Record<string, SetLogEntry> = {};
+        for (const [k, v] of Object.entries(prev)) {
+          next[k] = {
+            ...v,
+            completed: Boolean(result.setCompletionMap[k]),
+          };
+        }
+        return next;
+      });
+    },
+    [activeWorkoutId, customWorkouts, setLogs, completedSessionsThisWeek, weeklyConsistency]
+  );
+
+  const handleTopBarResetDay = useCallback(() => {
+    if (activeTab === 'workouts') {
+      handleResetWorkoutDay(activeWorkoutId);
+      setAnkleWarmupChecks({
+        ankle_circles: false,
+        wall_stretch: false,
+        band_resisted: false,
+      });
+      setFlatShoesVerified(false);
+      setLissMinutesToday(0);
+      return;
+    }
+    performDailyMidnightReset(getLocalDateString());
+    handleResetWorkoutDay(activeWorkoutId);
+  }, [activeTab, activeWorkoutId, handleResetWorkoutDay, performDailyMidnightReset]);
+
   const handleAddCustomWorkout = (workout: WorkoutDayPlan, scheduleDay?: string) => {
     setCustomWorkouts((prev) => [...prev, workout]);
     const newWorkoutLogs = buildDefaultSetLogs([workout]);
@@ -620,7 +672,7 @@ export default function App() {
             <PWAInstallButton />
             <button
               type="button"
-              onClick={() => performDailyMidnightReset(getLocalDateString())}
+              onClick={handleTopBarResetDay}
               className="px-3.5 py-2 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-600 rounded-2xl hover:from-pink-600 hover:to-pink-700 transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -987,6 +1039,7 @@ export default function App() {
             scheduleOverrides={scheduleOverrides}
             onUpdateScheduleDay={handleUpdateScheduleDay}
             onResetScheduleOverrides={handleResetScheduleOverrides}
+            onResetWorkoutDay={handleResetWorkoutDay}
             onResetWeek={() => performWeeklyReset(getWeekStartDateString())}
           />
         )}

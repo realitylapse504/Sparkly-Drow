@@ -29,6 +29,7 @@ interface WorkoutsViewProps {
   scheduleOverrides: Record<string, string>;
   onUpdateScheduleDay: (day: string, workoutOrRestId: string) => void;
   onResetScheduleOverrides: () => void;
+  onResetWorkoutDay: (workoutId: WorkoutDayPlan['id']) => void;
   onResetWeek: () => void;
   setLogs: Record<string, SetLogEntry>;
   onUpdateSetLogs: React.Dispatch<React.SetStateAction<Record<string, SetLogEntry>>>;
@@ -62,6 +63,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
   scheduleOverrides,
   onUpdateScheduleDay,
   onResetScheduleOverrides,
+  onResetWorkoutDay,
   onResetWeek,
   setLogs,
   onUpdateSetLogs,
@@ -245,11 +247,21 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {completedSessionsThisWeek.length > 0 && (
+            {(isCurrentSessionLogged || completedSetsInActive > 0) && (
+              <button
+                type="button"
+                onClick={() => onResetWorkoutDay(activeWorkout.id)}
+                className="px-3 py-2 rounded-2xl border border-pink-200 bg-pink-50/70 hover:bg-pink-100 text-xs font-bold text-pink-700 flex items-center gap-1 whitespace-nowrap"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset Highlighted Day
+              </button>
+            )}
+            {completedSessionsThisWeek.length > 1 && (
               <button
                 type="button"
                 onClick={onResetWeek}
-                className="px-3 py-2 rounded-2xl border border-pink-200 bg-pink-50/70 hover:bg-pink-100 text-xs font-bold text-pink-700 flex items-center gap-1 whitespace-nowrap"
+                className="px-3 py-2 rounded-2xl border border-teal-200 bg-teal-50/70 hover:bg-teal-100 text-xs font-bold text-teal-800 flex items-center gap-1 whitespace-nowrap"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reset Week ({completedSessionsThisWeek.length} Done)
@@ -597,7 +609,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               <p className="text-xs text-slate-500 mt-0.5">{activeWorkout.subtitle}</p>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               {activeWorkout.isCustom && (
                 <button
                   type="button"
@@ -607,6 +619,17 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
+                </button>
+              )}
+              {(isCurrentSessionLogged || completedSetsInActive > 0) && (
+                <button
+                  type="button"
+                  onClick={() => onResetWorkoutDay(activeWorkout.id)}
+                  aria-label={`Reset workout for ${activeWorkout.title}`}
+                  className="px-3.5 py-2.5 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset Workout
                 </button>
               )}
               <button

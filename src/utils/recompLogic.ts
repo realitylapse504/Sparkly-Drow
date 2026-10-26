@@ -245,6 +245,60 @@ export function applyWeeklyResetIfNeeded(
   };
 }
 
+export function resetWorkoutSessionForDay(params: {
+  workoutId: string;
+  exerciseIds: string[];
+  completedSessionsThisWeek: string[];
+  weeklyConsistency: WeeklyConsistencyState;
+  setCompletionMap: Record<string, boolean>;
+}): {
+  completedSessionsThisWeek: string[];
+  weeklyConsistency: WeeklyConsistencyState;
+  setCompletionMap: Record<string, boolean>;
+} {
+  const {
+    workoutId,
+    exerciseIds,
+    completedSessionsThisWeek,
+    weeklyConsistency,
+    setCompletionMap,
+  } = params;
+
+  const wasCompleted = completedSessionsThisWeek.includes(workoutId);
+  const nextCompletedSessions = completedSessionsThisWeek.filter((id) => id !== workoutId);
+
+  let nextWeeklyConsistency = { ...weeklyConsistency };
+  if (wasCompleted) {
+    if (workoutId === 'full_body_session') {
+      nextWeeklyConsistency = {
+        ...nextWeeklyConsistency,
+        weeklyFullBodyCompleted: false,
+      };
+    } else {
+      nextWeeklyConsistency = {
+        ...nextWeeklyConsistency,
+        programmedWorkoutsCompleted: Math.max(
+          0,
+          nextWeeklyConsistency.programmedWorkoutsCompleted - 1
+        ),
+      };
+    }
+  }
+
+  const nextSetCompletionMap: Record<string, boolean> = { ...setCompletionMap };
+  for (const key of Object.keys(nextSetCompletionMap)) {
+    if (exerciseIds.some((exId) => key.startsWith(`${exId}_set_`))) {
+      nextSetCompletionMap[key] = false;
+    }
+  }
+
+  return {
+    completedSessionsThisWeek: nextCompletedSessions,
+    weeklyConsistency: nextWeeklyConsistency,
+    setCompletionMap: nextSetCompletionMap,
+  };
+}
+
 export function applyPb2Addon(
   entry: Omit<FoodLogEntry, 'id' | 'timestamp'>,
   includePb2: boolean

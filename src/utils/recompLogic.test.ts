@@ -9,6 +9,7 @@ import {
   calculateCustomRecompMacros,
   applyMidnightResetIfNeeded,
   applyWeeklyResetIfNeeded,
+  resetWorkoutSessionForDay,
   getLocalDateString,
   getWeekStartDateString,
   getTimeUntilMidnight,
@@ -359,5 +360,34 @@ test('getWeekStartDateString and applyWeeklyResetIfNeeded reset completed workou
   assert.equal(newWeek.state.weeklyHistory[0].workoutsCompletedCount, 3);
   assert.equal(newWeek.state.weeklyHistory[0].keysMetCount, 3);
 });
+
+test('resetWorkoutSessionForDay resets only the currently highlighted day workout and its sets without clearing other days', () => {
+  const result = resetWorkoutSessionForDay({
+    workoutId: 'lower_a',
+    exerciseIds: ['la_1', 'la_2', 'la_3', 'la_4', 'la_5'],
+    completedSessionsThisWeek: ['upper_a', 'lower_a'],
+    weeklyConsistency: {
+      weeklyFullBodyCompleted: false,
+      programmedWorkoutsCompleted: 2,
+      macroDaysTrackedAndHit: 3,
+      cheatMode: 'two_meals',
+      cheatUsedCount: 0,
+    },
+    setCompletionMap: {
+      ua_1_set_1: true,
+      la_1_set_1: true,
+      la_2_set_1: true,
+    },
+  });
+
+  // lower_a removed, upper_a preserved
+  assert.deepEqual(result.completedSessionsThisWeek, ['upper_a']);
+  assert.equal(result.weeklyConsistency.programmedWorkoutsCompleted, 1);
+  // lower_a sets reset to false, upper_a sets preserved
+  assert.equal(result.setCompletionMap.la_1_set_1, false);
+  assert.equal(result.setCompletionMap.la_2_set_1, false);
+  assert.equal(result.setCompletionMap.ua_1_set_1, true);
+});
+
 
 
