@@ -683,7 +683,9 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                         className="px-3 py-1.5 rounded-xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-xs font-bold text-pink-700 flex items-center gap-1.5 whitespace-nowrap shrink-0"
                       >
                         <ArrowLeftRight className="w-3.5 h-3.5" />
-                        {lungeSwappedToBss ? 'Switch to Lunges' : 'Ankle Swap: Split Squats'}
+                        {lungeSwappedToBss
+                          ? 'Switch to Dumbbell Low Box Step-Up'
+                          : 'Ankle Swap: Bulgarian Split Squat'}
                       </button>
                     )}
                   </div>

@@ -389,5 +389,32 @@ test('resetWorkoutSessionForDay resets only the currently highlighted day workou
   assert.equal(result.setCompletionMap.ua_1_set_1, true);
 });
 
+test('all workouts and exercises use specific movement names with no broad or "or" exercise titles', () => {
+  assert.equal(WORKOUT_PLANS.length, 5);
+  for (const plan of WORKOUT_PLANS) {
+    assert.ok(plan.exercises.length >= 4, `${plan.id} should have at least 4 specific exercises`);
+    for (const ex of plan.exercises) {
+      assert.equal(
+        /\bor\b/i.test(ex.name),
+        false,
+        `Exercise "${ex.name}" in ${plan.id} should not contain "or"`
+      );
+      assert.equal(
+        /circuit|finisher|primary compound lift/i.test(ex.name),
+        false,
+        `Exercise "${ex.name}" in ${plan.id} should not use a broad category name`
+      );
+      if (ex.ankleSwapOption) {
+        assert.equal(
+          /\bor\b/i.test(ex.ankleSwapOption.swapName),
+          false,
+          `Swap exercise "${ex.ankleSwapOption.swapName}" should be specific`
+        );
+      }
+    }
+  }
+});
+
+
 
 
