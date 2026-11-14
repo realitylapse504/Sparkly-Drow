@@ -125,35 +125,35 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
   return (
     <section
       aria-labelledby="daily-quests-heading"
-      className="bg-white/95 border border-pink-200/80 rounded-3xl p-6 lg:p-7 shadow-xs space-y-5"
+      className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 lg:p-7 space-y-5"
     >
       {/* Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-teal-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
         <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-pink-600">
-            <span className="inline-flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-teal-500" />
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-zinc-400">
+            <span className="inline-flex items-center gap-1 text-white">
+              <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
               Daily Warm-Up Quests
             </span>
             <span aria-hidden="true">·</span>
-            <span className="font-mono tabular-nums text-teal-700">
+            <span className="font-mono tabular-nums text-[#25e86a] font-bold">
               {completedCount} / {totalCount} Done Today
             </span>
             {totalLifetimeQuestsCompleted > 0 && (
               <>
                 <span aria-hidden="true">·</span>
-                <span className="font-mono tabular-nums text-slate-500 font-normal">
+                <span className="font-mono tabular-nums text-zinc-500 font-normal">
                   {totalLifetimeQuestsCompleted} Total Completed
                 </span>
               </>
             )}
           </div>
-          <h2 id="daily-quests-heading" className="text-xl font-bold text-slate-900">
+          <h2 id="daily-quests-heading" className="text-xl font-bold text-white">
             {allCompleted
               ? 'All Daily Warm-Up Quests Complete!'
               : 'Today’s Warm-Up Degree Quests'}
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-zinc-400">
             Bite-sized warm-up flows, joint prep, and light movement to wake up your body every day.
           </p>
         </div>
@@ -162,15 +162,15 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
           <button
             type="button"
             onClick={onShuffleQuests}
-            className="px-3.5 py-2 rounded-2xl border border-teal-200 bg-teal-50/70 hover:bg-teal-100 text-teal-900 text-xs font-bold flex items-center gap-1.5 transition-colors whitespace-nowrap"
+            className="px-3.5 py-2 rounded-full border border-zinc-800 bg-[#1c1c1f] hover:bg-[#252529] text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap"
           >
-            <Shuffle className="w-3.5 h-3.5 text-teal-600" />
+            <Shuffle className="w-3.5 h-3.5 text-zinc-400" />
             Shuffle Warm-Ups
           </button>
           <button
             type="button"
             onClick={() => setShowCustomForm((prev) => !prev)}
-            className="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-teal-500 to-pink-500 hover:opacity-95 text-white text-xs font-bold flex items-center gap-1.5 transition-opacity whitespace-nowrap shadow-xs"
+            className="px-4 py-2 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold flex items-center gap-1.5 transition-colors whitespace-nowrap"
           >
             {showCustomForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
             {showCustomForm ? 'Close' : 'Custom Warm-Up'}
@@ -179,9 +179,9 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full h-2.5 bg-pink-100/80 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-[#1c1c1f] rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-teal-400 via-teal-500 to-pink-500 transition-all duration-200"
+          className="h-full bg-[#25e86a] transition-all duration-200"
           style={{ width: `${progressPct}%` }}
         />
       </div>
@@ -190,21 +190,21 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
       {showCustomForm && (
         <form
           onSubmit={handleCreateCustomQuest}
-          className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-teal-50/70 via-white to-pink-50/70 border border-pink-200 space-y-3.5"
+          className="p-4 sm:p-5 rounded-2xl bg-[#18181b] border border-zinc-800 space-y-3.5"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900">Add a Custom Daily Warm-Up Quest</h3>
-            <span className="text-[11px] font-semibold text-pink-600">Repeats Daily</span>
+            <h3 className="text-sm font-bold text-white">Add a Custom Daily Warm-Up Quest</h3>
+            <span className="text-[11px] font-semibold text-[#25e86a]">Repeats Daily</span>
           </div>
 
           {formError && (
-            <p role="alert" className="text-xs font-semibold text-red-600">
+            <p role="alert" className="text-xs font-semibold text-red-400">
               {formError}
             </p>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <label className="sm:col-span-2 block text-xs font-medium text-slate-600">
+            <label className="sm:col-span-2 block text-xs font-medium text-zinc-400">
               Warm-Up Title
               <input
                 type="text"
@@ -212,11 +212,11 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                 onChange={(e) => setCustomTitle(e.target.value)}
                 placeholder="e.g., Wrist & Shoulder Warm-Up"
                 aria-label="Warm-Up Title"
-                className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                className="mt-1 w-full px-3 py-2 text-xs bg-[#0d0d0f] border border-zinc-800 rounded-xl text-white placeholder:text-zinc-600"
               />
             </label>
 
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-zinc-400">
               Category
               <select
                 value={customCategory}
@@ -224,7 +224,7 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                   setCustomCategory(e.target.value as DailyWarmupQuest['category'])
                 }
                 aria-label="Warm-Up Category"
-                className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                className="mt-1 w-full px-3 py-2 text-xs bg-[#0d0d0f] border border-zinc-800 rounded-xl text-white"
               >
                 <option value="Mobility Flow">Mobility Flow</option>
                 <option value="Core & Glute Spark">Core & Glute Spark</option>
@@ -233,7 +233,7 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
               </select>
             </label>
 
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-zinc-400">
               Duration
               <input
                 type="text"
@@ -241,12 +241,12 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                 onChange={(e) => setCustomDuration(e.target.value)}
                 placeholder="3 mins"
                 aria-label="Warm-Up Duration"
-                className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                className="mt-1 w-full px-3 py-2 text-xs bg-[#0d0d0f] border border-zinc-800 rounded-xl text-white placeholder:text-zinc-600"
               />
             </label>
           </div>
 
-          <label className="block text-xs font-medium text-slate-600">
+          <label className="block text-xs font-medium text-zinc-400">
             Warm-Up Moves / Reps
             <input
               type="text"
@@ -254,7 +254,7 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
               onChange={(e) => setCustomPrescription(e.target.value)}
               placeholder="e.g., 10 wrist circles · 12 band pull-aparts · 20s plank"
               aria-label="Warm-Up Moves"
-              className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+              className="mt-1 w-full px-3 py-2 text-xs bg-[#0d0d0f] border border-zinc-800 rounded-xl text-white placeholder:text-zinc-600"
             />
           </label>
 
@@ -262,13 +262,13 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
             <button
               type="button"
               onClick={() => setShowCustomForm(false)}
-              className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600"
+              className="px-3.5 py-1.5 rounded-full border border-zinc-800 bg-[#121214] text-xs font-semibold text-zinc-300 hover:bg-[#1c1c1f]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold"
+              className="px-4 py-1.5 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold"
             >
               Save Daily Quest
             </button>
@@ -290,15 +290,15 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
               key={quest.id}
               className={`rounded-2xl border p-4 flex flex-col justify-between gap-3.5 transition-all ${
                 isDone
-                  ? 'border-teal-400 bg-gradient-to-br from-teal-50/70 to-white'
-                  : 'border-teal-200/80 bg-white hover:border-pink-300'
+                  ? 'border-[#25e86a]/40 bg-[#18181b]'
+                  : 'border-zinc-800/90 bg-[#18181b] hover:border-zinc-700'
               }`}
             >
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between gap-2 text-[11px] font-bold">
-                  <span className="text-teal-700">{quest.category}</span>
+                <div className="flex items-center justify-between gap-2 text-[11px] font-semibold">
+                  <span className="text-zinc-400">{quest.category}</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-pink-600 tabular-nums">
+                    <span className="font-mono text-yellow-400 font-bold tabular-nums">
                       {quest.durationLabel}
                     </span>
                     {quest.isCustom && (
@@ -306,7 +306,7 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                         type="button"
                         onClick={() => onDeleteCustomQuest(quest.id)}
                         aria-label={`Delete custom quest ${quest.title}`}
-                        className="text-slate-400 hover:text-pink-600 p-0.5"
+                        className="text-zinc-500 hover:text-red-400 p-0.5"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -314,20 +314,20 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                   </div>
                 </div>
 
-                <h3 className="text-sm font-bold text-slate-900 leading-snug">
+                <h3 className="text-sm font-bold text-white leading-snug">
                   {quest.title}
                 </h3>
 
-                <p className="text-xs font-semibold text-pink-600 leading-relaxed">
+                <p className="text-xs font-medium text-zinc-200 leading-relaxed">
                   {quest.prescription}
                 </p>
 
-                <p className="text-[11px] text-slate-500 leading-relaxed">
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
                   {quest.detail}
                 </p>
               </div>
 
-              <div className="pt-2.5 border-t border-teal-100/80 flex items-center justify-between gap-2">
+              <div className="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between gap-2">
                 {/* Optional Quick Warm-Up Timer */}
                 <div className="flex items-center gap-1.5">
                   <button
@@ -336,9 +336,9 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                     aria-label={`${
                       isTimerActiveForThis && timerRunning ? 'Pause' : 'Start'
                     } timer for ${quest.title}`}
-                    className="px-2.5 py-1.5 rounded-xl border border-teal-200 bg-teal-50/70 hover:bg-teal-100 text-teal-900 text-[11px] font-mono font-bold flex items-center gap-1 whitespace-nowrap"
+                    className="px-2.5 py-1.5 rounded-full border border-zinc-800 bg-[#121214] hover:bg-[#222226] text-zinc-200 text-[11px] font-mono font-semibold flex items-center gap-1 whitespace-nowrap"
                   >
-                    <Timer className="w-3.5 h-3.5 text-pink-500" />
+                    <Timer className="w-3.5 h-3.5 text-zinc-400" />
                     <span>
                       {isTimerActiveForThis && timerRunning
                         ? `Pause ${formatSeconds(displaySeconds)}`
@@ -350,7 +350,7 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                       type="button"
                       onClick={() => handleResetTimer(quest)}
                       aria-label={`Reset timer for ${quest.title}`}
-                      className="p-1.5 rounded-xl border border-slate-200 text-slate-500 hover:text-pink-600"
+                      className="p-1.5 rounded-full border border-zinc-800 text-zinc-400 hover:text-white"
                     >
                       <RotateCcw className="w-3 h-3" />
                     </button>
@@ -362,10 +362,10 @@ export const DailyQuestsSection: React.FC<DailyQuestsSectionProps> = ({
                   type="button"
                   onClick={() => onToggleQuest(quest.id)}
                   aria-label={`Complete quest ${quest.title}`}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 ${
                     isDone
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-pink-500 hover:bg-pink-600 text-white'
+                      ? 'bg-[#25e86a]/15 border border-[#25e86a]/40 text-[#25e86a]'
+                      : 'bg-[#25e86a] hover:bg-[#1ed760] text-black'
                   }`}
                 >
                   {isDone && <Check className="w-3.5 h-3.5" />}

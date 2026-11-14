@@ -626,9 +626,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col text-slate-900">
+    <div className="min-h-screen flex flex-col bg-black text-white">
       {/* Strict 3-Zone Top Bar Contract — Desktop & Mobile App Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-pink-200/70 px-4 sm:px-6 py-3.5">
+      <header className="sticky top-0 z-30 bg-black/90 backdrop-blur-md border-b border-zinc-900 px-4 sm:px-6 py-3.5">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 sm:gap-8">
           {/* Zone 1: Brand Wordmark */}
           <a
@@ -637,13 +637,13 @@ export default function App() {
               e.preventDefault();
               handleSelectTab('dashboard');
             }}
-            className="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-teal-500 via-pink-500 to-teal-500 bg-clip-text text-transparent whitespace-nowrap shrink-0"
+            className="text-lg sm:text-xl font-bold tracking-tight text-white whitespace-nowrap shrink-0"
           >
             The Sparkly Drow
           </a>
 
           {/* Zone 2: 4 Concise Nav Links (Desktop) */}
-          <nav aria-label="Primary Navigation" className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
+          <nav aria-label="Primary Navigation" className="hidden md:flex items-center gap-7 text-sm font-medium text-zinc-400">
             {(
               [
                 { id: 'dashboard', label: 'Today' },
@@ -658,8 +658,8 @@ export default function App() {
                 onClick={() => handleSelectTab(nav.id)}
                 className={`transition-colors whitespace-nowrap shrink-0 pb-0.5 ${
                   activeTab === nav.id
-                    ? 'text-pink-600 font-bold border-b-2 border-teal-400'
-                    : 'text-slate-600 hover:text-teal-600'
+                    ? 'text-white font-bold border-b-2 border-[#25e86a]'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 {nav.label}
@@ -673,7 +673,7 @@ export default function App() {
             <button
               type="button"
               onClick={handleTopBarResetDay}
-              className="px-3.5 py-2 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-pink-600 rounded-2xl hover:from-pink-600 hover:to-pink-700 transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2 text-xs font-bold text-black bg-[#25e86a] hover:bg-[#1ed760] rounded-full transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Reset Day</span>
@@ -687,26 +687,26 @@ export default function App() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-24 md:pb-8 space-y-6 sm:space-y-8">
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
-            {/* Airy, Upbeat Hero Card */}
-            <section className="bg-white/95 border border-teal-200/80 rounded-3xl p-7 lg:p-8 shadow-xs">
+            {/* Sleek Pure Dark Hero Card */}
+            <section className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-7 lg:p-8">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 {/* Left 6 Columns: Friendly Greeting & Quick Jumps */}
                 <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
                   <div className="space-y-2.5">
-                    <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-teal-600">
-                      <span>4-Day Split</span>
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-zinc-400">
+                      <span className="text-white">4-Day Split</span>
                       <span aria-hidden="true">·</span>
-                      <span className="text-pink-500">Ankle-Friendly</span>
+                      <span className="text-[#25e86a]">Ankle-Friendly</span>
                       <span aria-hidden="true">·</span>
-                      <span className="font-mono tabular-nums inline-flex items-center gap-1 text-slate-500 font-normal">
-                        <Clock className="w-3.5 h-3.5 text-pink-500" />
+                      <span className="font-mono tabular-nums inline-flex items-center gap-1 text-zinc-400 font-normal">
+                        <Clock className="w-3.5 h-3.5 text-yellow-400" />
                         Resets in {midnightCountdown}
                       </span>
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 text-balance">
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white text-balance">
                       Strong, Fueled & Feeling Good
                     </h1>
-                    <p className="text-sm text-slate-600 leading-relaxed max-w-md">
+                    <p className="text-sm text-zinc-400 leading-relaxed max-w-md">
                       Your daily spot for warm-up quests, ankle-friendly lifts, 2,118 cal macro goals, and 120 oz of water. Daily logs reset at midnight and weekly workouts reset every Monday!
                     </p>
                   </div>
@@ -715,45 +715,45 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => handleSelectTab('workouts')}
-                      className="px-5 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-600 text-white text-xs font-bold transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5"
+                      className="px-5 py-2.5 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5"
                     >
                       Start a Workout <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSelectTab('nutrition')}
-                      className="px-5 py-2.5 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition-all whitespace-nowrap shrink-0"
+                      className="px-5 py-2.5 rounded-full bg-[#1c1c1f] hover:bg-[#252529] border border-zinc-800 text-white text-xs font-semibold transition-all whitespace-nowrap shrink-0"
                     >
                       Log Food & Water
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSelectTab('goals')}
-                      className="px-4 py-2.5 rounded-2xl border border-teal-200 bg-teal-50/60 hover:bg-teal-100/70 text-teal-900 text-xs font-bold transition-all whitespace-nowrap shrink-0"
+                      className="px-4 py-2.5 rounded-full border border-zinc-800 bg-[#18181b] hover:bg-[#222226] text-zinc-300 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
                     >
                       Check-In Inches
                     </button>
                   </div>
                 </div>
 
-                {/* Right 6 Columns: Bubbly Weekly Wins (Keys to Success) */}
-                <div className="lg:col-span-6 bg-gradient-to-br from-teal-50/90 via-white to-pink-50/90 border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+                {/* Right 6 Columns: Weekly Wins (Keys to Success) */}
+                <div className="lg:col-span-6 bg-[#18181b] border border-zinc-800/90 rounded-3xl p-6 flex flex-col justify-between space-y-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h2 className="text-base font-bold text-slate-900">This Week’s Keys to Success</h2>
-                      <p className="text-xs text-slate-500">
+                      <h2 className="text-base font-bold text-white">This Week’s Keys to Success</h2>
+                      <p className="text-xs text-zinc-400">
                         Week of {lastActiveWeekStart} · Auto-resets Monday
                         {weeklyHistory.length > 0 && ` · ${weeklyHistory.length} wks logged`}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-mono font-bold text-pink-600 tabular-nums">
+                      <span className="text-xs font-mono font-bold text-[#25e86a] tabular-nums">
                         {keysStatus.totalKeysMet} / 3 Hit
                       </span>
                       <button
                         type="button"
                         onClick={() => performWeeklyReset(getWeekStartDateString())}
-                        className="px-2.5 py-1 rounded-xl border border-teal-200 bg-white hover:bg-teal-50 text-teal-800 text-[11px] font-bold flex items-center gap-1 transition-colors"
+                        className="px-2.5 py-1 rounded-full border border-zinc-800 bg-[#121214] hover:bg-[#222226] text-zinc-300 text-[11px] font-semibold flex items-center gap-1 transition-colors"
                       >
                         <RotateCcw className="w-3 h-3" />
                         Reset Week
@@ -763,10 +763,10 @@ export default function App() {
 
                   <div className="space-y-3 text-xs">
                     {/* Key 1: Full-Body + 2 Split Days */}
-                    <div className="p-3.5 rounded-2xl bg-white border border-teal-200/80 flex items-center justify-between gap-3">
+                    <div className="p-3.5 rounded-2xl bg-[#121214] border border-zinc-800/80 flex items-center justify-between gap-3">
                       <div>
-                        <p className="font-bold text-slate-900">1. Full-Body Session (1x) + 2 Split Days</p>
-                        <p className="text-slate-500 mt-0.5 font-mono tabular-nums">
+                        <p className="font-bold text-white">1. Full-Body Session (1x) + 2 Split Days</p>
+                        <p className="text-zinc-400 mt-0.5 font-mono tabular-nums">
                           Full-Body: {weeklyConsistency.weeklyFullBodyCompleted ? 'Done' : 'Not yet'} · Split:{' '}
                           {weeklyConsistency.programmedWorkoutsCompleted}/2
                         </p>
@@ -779,10 +779,10 @@ export default function App() {
                             weeklyFullBodyCompleted: !prev.weeklyFullBodyCompleted,
                           }))
                         }
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 flex items-center gap-1 transition-colors ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0 flex items-center gap-1 transition-colors ${
                           weeklyConsistency.weeklyFullBodyCompleted
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                            ? 'bg-[#25e86a] text-black'
+                            : 'bg-[#1c1c1f] border border-zinc-800 text-zinc-200 hover:bg-[#27272a]'
                         }`}
                       >
                         {weeklyConsistency.weeklyFullBodyCompleted && <Check className="w-3.5 h-3.5" />}
@@ -791,10 +791,10 @@ export default function App() {
                     </div>
 
                     {/* Key 2: 5 Macro Days */}
-                    <div className="p-3.5 rounded-2xl bg-white border border-pink-200/80 flex items-center justify-between gap-3">
+                    <div className="p-3.5 rounded-2xl bg-[#121214] border border-zinc-800/80 flex items-center justify-between gap-3">
                       <div>
-                        <p className="font-bold text-slate-900">2. Hit Macros 5x / Week</p>
-                        <p className="text-slate-500 mt-0.5 font-mono tabular-nums">
+                        <p className="font-bold text-white">2. Hit Macros 5x / Week</p>
+                        <p className="text-zinc-400 mt-0.5 font-mono tabular-nums">
                           {weeklyConsistency.macroDaysTrackedAndHit}/5 days hit · 2 days off-duty!
                         </p>
                       </div>
@@ -808,7 +808,7 @@ export default function App() {
                               macroDaysTrackedAndHit: Math.max(0, prev.macroDaysTrackedAndHit - 1),
                             }))
                           }
-                          className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
+                          className="px-2.5 py-1.5 rounded-full bg-[#1c1c1f] hover:bg-[#27272a] border border-zinc-800 text-zinc-300 font-mono font-bold"
                         >
                           -
                         </button>
@@ -821,7 +821,7 @@ export default function App() {
                               macroDaysTrackedAndHit: Math.min(7, prev.macroDaysTrackedAndHit + 1),
                             }))
                           }
-                          className="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-mono font-bold"
+                          className="px-3.5 py-1.5 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black font-mono font-bold"
                         >
                           +1 Day
                         </button>
@@ -829,15 +829,15 @@ export default function App() {
                     </div>
 
                     {/* Key 3: Cheat Option */}
-                    <div className="p-3.5 rounded-2xl bg-white border border-teal-200/80 flex flex-wrap items-center justify-between gap-2">
+                    <div className="p-3.5 rounded-2xl bg-[#121214] border border-zinc-800/80 flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <p className="font-bold text-slate-900">3. Weekly Treat Choice</p>
-                        <p className="text-slate-500 mt-0.5 font-mono tabular-nums">
+                        <p className="font-bold text-white">3. Weekly Treat Choice</p>
+                        <p className="text-zinc-400 mt-0.5 font-mono tabular-nums">
                           {weeklyConsistency.cheatUsedCount}/{keysStatus.maxAllowedCheats} used this week
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="flex items-center gap-1 bg-pink-50 p-1 rounded-xl border border-pink-200/60">
+                        <div className="flex items-center gap-1 bg-[#1c1c1f] p-1 rounded-full border border-zinc-800">
                           <button
                             type="button"
                             onClick={() =>
@@ -847,10 +847,10 @@ export default function App() {
                                 cheatUsedCount: Math.min(1, prev.cheatUsedCount),
                               }))
                             }
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 ${
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap shrink-0 ${
                               weeklyConsistency.cheatMode === 'one_day'
-                                ? 'bg-pink-500 text-white'
-                                : 'text-pink-700 hover:text-pink-900'
+                                ? 'bg-[#25e86a] text-black'
+                                : 'text-zinc-400 hover:text-white'
                             }`}
                           >
                             1 Cheat Day
@@ -863,10 +863,10 @@ export default function App() {
                                 cheatMode: 'two_meals',
                               }))
                             }
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 ${
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap shrink-0 ${
                               weeklyConsistency.cheatMode === 'two_meals'
-                                ? 'bg-teal-500 text-white'
-                                : 'text-teal-800 hover:text-teal-950'
+                                ? 'bg-[#25e86a] text-black'
+                                : 'text-zinc-400 hover:text-white'
                             }`}
                           >
                             2 Cheat Meals
@@ -881,7 +881,7 @@ export default function App() {
                                 (prev.cheatUsedCount + 1) % (keysStatus.maxAllowedCheats + 1),
                             }))
                           }
-                          className="px-2.5 py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-800 text-[11px] font-bold whitespace-nowrap shrink-0"
+                          className="px-3 py-1.5 rounded-full bg-[#1c1c1f] hover:bg-[#27272a] border border-zinc-800 text-zinc-200 text-[11px] font-semibold whitespace-nowrap shrink-0"
                         >
                           Use Treat
                         </button>
@@ -903,47 +903,47 @@ export default function App() {
               onDeleteCustomQuest={handleDeleteCustomDailyQuest}
             />
 
-            {/* 4 Bubbly Daily Snapshot Cards (Uncluttered — No Duplicate Full Page Below!) */}
+            {/* 4 Daily Snapshot Cards (Matching Screenshot Stat Boxes) */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {/* Card 1: Daily Fuel */}
-              <div className="bg-white border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+              <div className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-pink-600">
+                  <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
                     <span>Today’s Fuel</span>
-                    <Flame className="w-4 h-4" />
+                    <Flame className="w-4 h-4 text-[#25e86a]" />
                   </div>
-                  <p className="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-2">
-                    {nutritionStatus.totals.calories} <span className="text-sm font-normal text-slate-400">/ {activeTargets.calories} cal</span>
+                  <p className="text-3xl font-bold font-mono tabular-nums text-white mt-2">
+                    {nutritionStatus.totals.calories} <span className="text-sm font-normal text-zinc-500">/ {activeTargets.calories} cal</span>
                   </p>
-                  <p className="text-xs font-mono tabular-nums text-slate-600 mt-1.5">
-                    Protein: <strong>{nutritionStatus.totals.protein}g</strong> / {activeTargets.protein}g
+                  <p className="text-xs font-mono tabular-nums text-zinc-400 mt-1.5">
+                    Protein: <strong className="text-white">{nutritionStatus.totals.protein}g</strong> / {activeTargets.protein}g
                   </p>
-                  <p className="text-xs font-mono tabular-nums text-slate-500 mt-0.5">
+                  <p className="text-xs font-mono tabular-nums text-zinc-500 mt-0.5">
                     Carbs: {nutritionStatus.totals.carbs}g · Fats: {nutritionStatus.totals.fats}g
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleSelectTab('nutrition')}
-                  className="w-full py-2 px-3 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold transition-colors"
+                  className="w-full py-2 px-3 rounded-full bg-[#1c1c1f] hover:bg-[#27272a] border border-zinc-800 text-white text-xs font-semibold transition-colors"
                 >
                   Open Food Picker
                 </button>
               </div>
 
               {/* Card 2: 120 oz Water Quick-Tap */}
-              <div className="bg-white border border-teal-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+              <div className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-teal-600">
+                  <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
                     <span>120 oz Water Goal</span>
-                    <Droplets className="w-4 h-4" />
+                    <Droplets className="w-4 h-4 text-[#25e86a]" />
                   </div>
-                  <p className="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-2">
-                    {waterOz} <span className="text-sm font-normal text-slate-400">/ {activeTargets.waterOz} oz</span>
+                  <p className="text-3xl font-bold font-mono tabular-nums text-white mt-2">
+                    {waterOz} <span className="text-sm font-normal text-zinc-500">/ {activeTargets.waterOz} oz</span>
                   </p>
-                  <div className="w-full h-2 bg-teal-100 rounded-full overflow-hidden mt-2.5">
+                  <div className="w-full h-2 bg-[#1c1c1f] rounded-full overflow-hidden mt-2.5">
                     <div
-                      className="h-full bg-gradient-to-r from-teal-400 to-pink-400 transition-transform duration-150 origin-left"
+                      className="h-full bg-[#25e86a] transition-transform duration-150 origin-left"
                       style={{ width: `${waterPct}%` }}
                     />
                   </div>
@@ -954,7 +954,7 @@ export default function App() {
                       key={oz}
                       type="button"
                       onClick={() => setWaterOz((prev) => prev + oz)}
-                      className="py-1.5 px-2 rounded-xl bg-teal-500 hover:bg-teal-600 text-white text-xs font-mono font-bold transition-colors"
+                      className="py-1.5 px-2 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-mono font-bold transition-colors"
                     >
                       +{oz}oz
                     </button>
@@ -963,39 +963,39 @@ export default function App() {
               </div>
 
               {/* Card 3: Workouts */}
-              <div className="bg-white border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+              <div className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-pink-600">
+                  <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
                     <span>4-Day Split</span>
-                    <Dumbbell className="w-4 h-4" />
+                    <Dumbbell className="w-4 h-4 text-yellow-400" />
                   </div>
-                  <p className="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-2">
-                    {completedSessionsThisWeek.length} <span className="text-sm font-normal text-slate-400">logged this week</span>
+                  <p className="text-3xl font-bold font-mono tabular-nums text-white mt-2">
+                    {completedSessionsThisWeek.length} <span className="text-sm font-normal text-zinc-500">logged this week</span>
                   </p>
-                  <p className="text-xs text-slate-500 mt-1.5">
+                  <p className="text-xs text-zinc-400 mt-1.5">
                     Upper / Lower split with left-ankle warm-ups & swaps built in.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleSelectTab('workouts')}
-                  className="w-full py-2 px-3 rounded-2xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold transition-colors"
+                  className="w-full py-2 px-3 rounded-full bg-[#1c1c1f] hover:bg-[#27272a] border border-zinc-800 text-white text-xs font-semibold transition-colors"
                 >
                   View Workout Plan
                 </button>
               </div>
 
               {/* Card 4: Inches & Energy */}
-              <div className="bg-white border border-teal-200/80 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+              <div className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-teal-600">
+                  <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
                     <span>Inches & Energy</span>
-                    <Ruler className="w-4 h-4" />
+                    <Ruler className="w-4 h-4 text-[#25e86a]" />
                   </div>
-                  <p className="text-2xl font-bold font-mono tabular-nums text-teal-600 mt-2">
+                  <p className="text-3xl font-bold font-mono tabular-nums text-[#25e86a] mt-2">
                     {measurements.length < 2 ? '0.0 in' : `${inchSummary.totalInchesDelta} in`}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1.5">
+                  <p className="text-xs text-zinc-400 mt-1.5">
                     {measurements.length === 0
                       ? 'Log your starting measurements anytime.'
                       : `Energy: ${inchSummary.avgEnergy}/10 · Sleep: ${inchSummary.avgSleep}h`}
@@ -1004,7 +1004,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => handleSelectTab('goals')}
-                  className="w-full py-2 px-3 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold transition-colors"
+                  className="w-full py-2 px-3 rounded-full bg-[#1c1c1f] hover:bg-[#27272a] border border-zinc-800 text-white text-xs font-semibold transition-colors"
                 >
                   Log Check-In
                 </button>
@@ -1067,10 +1067,10 @@ export default function App() {
         )}
       </main>
 
-      {/* Native Mobile App Bottom Navigation Dock (< 768px) */}
+      {/* Native Mobile App Bottom Navigation Dock (< 768px) — Matches Screenshot Pill Dock */}
       <nav
         aria-label="Mobile App Navigation"
-        className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 backdrop-blur-md border-t border-pink-200/80 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
+        className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#121214]/95 backdrop-blur-md border-t border-zinc-800 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
       >
         <div className="grid grid-cols-4 gap-1 max-w-md mx-auto">
           {(
@@ -1089,11 +1089,11 @@ export default function App() {
                 onClick={() => handleSelectTab(id)}
                 className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl transition-all ${
                   active
-                    ? 'bg-gradient-to-r from-teal-500/15 to-pink-500/15 text-pink-600 font-bold'
-                    : 'text-slate-500 hover:text-teal-600 font-medium'
+                    ? 'bg-[#1c1c1f] border border-zinc-700 text-white font-bold'
+                    : 'text-zinc-500 hover:text-zinc-300 font-medium'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${active ? 'text-pink-500' : 'text-teal-600'}`} />
+                <Icon className={`w-5 h-5 ${active ? 'text-[#25e86a]' : 'text-zinc-500'}`} />
                 <span className="text-[11px] mt-0.5 leading-tight whitespace-nowrap">{label}</span>
               </button>
             );
@@ -1104,30 +1104,30 @@ export default function App() {
       <OfflineIndicator />
 
       {/* Quiet, Concise Desktop Footer */}
-      <footer className="hidden md:block border-t border-pink-200/60 bg-white/80 px-6 py-5 mt-12">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <footer className="hidden md:block border-t border-zinc-900 bg-black px-6 py-5 mt-12">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <span>
-            <strong className="text-pink-600">The Sparkly Drow</strong> · 2,118 cal · 129g Protein · 120 oz Water · Resets at 12:00 AM
+            <strong className="text-white">The Sparkly Drow</strong> · 2,118 cal · 129g Protein · 120 oz Water · Resets at 12:00 AM
           </span>
           <div className="flex items-center gap-5 font-semibold">
             <button
               type="button"
               onClick={() => handleSelectTab('workouts')}
-              className="text-teal-600 hover:text-pink-600 transition-colors"
+              className="text-zinc-400 hover:text-white transition-colors"
             >
               Workouts
             </button>
             <button
               type="button"
               onClick={() => handleSelectTab('nutrition')}
-              className="text-teal-600 hover:text-pink-600 transition-colors"
+              className="text-zinc-400 hover:text-white transition-colors"
             >
               Nutrition
             </button>
             <button
               type="button"
               onClick={() => handleSelectTab('goals')}
-              className="text-teal-600 hover:text-pink-600 transition-colors"
+              className="text-zinc-400 hover:text-white transition-colors"
             >
               Progress & Guide
             </button>

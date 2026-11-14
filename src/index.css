@@ -4,12 +4,13 @@
   :root {
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
+    color-scheme: dark;
   }
 
   body {
     font-family: var(--font-sans);
-    background: linear-gradient(135deg, #f0fdfa 0%, #fdf2f8 50%, #f0fdfa 100%);
-    color: #1e1b2e;
+    background-color: #000000;
+    color: #ffffff;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;

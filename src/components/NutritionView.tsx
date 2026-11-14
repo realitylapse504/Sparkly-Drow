@@ -142,14 +142,14 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
       {/* Top Row: Daily Macros & 120 oz Water */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* 8-Column Macro & Guardrail Card */}
-        <section aria-labelledby="macro-command-heading" className="lg:col-span-8 bg-white border border-pink-200/80 rounded-3xl p-6 flex flex-col justify-between">
+        <section aria-labelledby="macro-command-heading" className="lg:col-span-8 bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-pink-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800/80">
               <div>
-                <h2 id="macro-command-heading" className="text-lg font-bold text-slate-900">
+                <h2 id="macro-command-heading" className="text-lg font-bold text-white">
                   Daily Macros & Targets
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-zinc-400">
                   Hit your targets 5 days a week — 2 days are flexible!
                 </p>
               </div>
@@ -158,18 +158,18 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCalculator((prev) => !prev)}
-                  className="px-3 py-2 rounded-2xl border border-teal-200 bg-teal-50/50 hover:bg-teal-100/70 text-xs font-bold text-teal-800 flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                  className="px-3.5 py-2 rounded-full border border-zinc-800 bg-[#1c1c1f] hover:bg-[#27272a] text-xs font-semibold text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0"
                 >
-                  <Calculator className="w-3.5 h-3.5 text-teal-600" />
+                  <Calculator className="w-3.5 h-3.5 text-zinc-400" />
                   {showCalculator ? 'Hide Calculator' : 'Macro Calculator'}
                 </button>
                 <button
                   type="button"
                   onClick={onCreditMacroDay}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
                     macroDayCreditedToday
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-pink-500 text-white hover:bg-pink-600'
+                      ? 'bg-yellow-400 text-black'
+                      : 'bg-[#25e86a] text-black hover:bg-[#1ed760]'
                   }`}
                 >
                   {macroDayCreditedToday ? 'Day Counted!' : 'Count Today (5x/wk)'}
@@ -177,63 +177,63 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
               </div>
             </div>
 
-            {/* 4 Bubbly Macro Boxes */}
+            {/* 4 Macro Boxes (Matching Screenshot Stat Boxes) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-4">
               {/* Calories */}
-              <div className="p-3.5 rounded-2xl bg-pink-50/40 border border-pink-200/70">
-                <span className="text-xs text-pink-600 font-bold">Calories</span>
+              <div className="p-3.5 rounded-2xl bg-[#18181b] border border-zinc-800/90">
+                <span className="text-xs text-zinc-400 font-semibold">Calories</span>
                 <div className="mt-1 flex items-baseline justify-between font-mono tabular-nums">
-                  <span className="text-xl font-bold text-slate-900">{status.totals.calories}</span>
-                  <span className="text-xs text-slate-400">/ {activeTargets.calories}</span>
+                  <span className="text-2xl font-bold text-white">{status.totals.calories}</span>
+                  <span className="text-xs text-zinc-500">/ {activeTargets.calories}</span>
                 </div>
-                <div className="w-full h-1.5 bg-pink-100 rounded-full overflow-hidden mt-2">
+                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-2">
                   <div
-                    className="h-full bg-pink-500 transition-transform duration-150 origin-left"
+                    className="h-full bg-[#25e86a] transition-transform duration-150 origin-left"
                     style={{ width: `${status.macroPercentages.calories}%` }}
                   />
                 </div>
               </div>
 
               {/* Protein */}
-              <div className="p-3.5 rounded-2xl bg-teal-50/40 border border-teal-200/70">
-                <span className="text-xs text-teal-600 font-bold">Protein</span>
+              <div className="p-3.5 rounded-2xl bg-[#18181b] border border-zinc-800/90">
+                <span className="text-xs text-zinc-400 font-semibold">Protein</span>
                 <div className="mt-1 flex items-baseline justify-between font-mono tabular-nums">
-                  <span className="text-xl font-bold text-slate-900">{status.totals.protein}g</span>
-                  <span className="text-xs text-slate-400">/ {activeTargets.protein}g</span>
+                  <span className="text-2xl font-bold text-white">{status.totals.protein}g</span>
+                  <span className="text-xs text-zinc-500">/ {activeTargets.protein}g</span>
                 </div>
-                <div className="w-full h-1.5 bg-teal-100 rounded-full overflow-hidden mt-2">
+                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-2">
                   <div
-                    className="h-full bg-teal-500 transition-transform duration-150 origin-left"
+                    className="h-full bg-[#25e86a] transition-transform duration-150 origin-left"
                     style={{ width: `${status.macroPercentages.protein}%` }}
                   />
                 </div>
               </div>
 
               {/* Carbs */}
-              <div className="p-3.5 rounded-2xl bg-pink-50/40 border border-pink-200/70">
-                <span className="text-xs text-pink-600 font-bold">Carbs</span>
+              <div className="p-3.5 rounded-2xl bg-[#18181b] border border-zinc-800/90">
+                <span className="text-xs text-zinc-400 font-semibold">Carbs</span>
                 <div className="mt-1 flex items-baseline justify-between font-mono tabular-nums">
-                  <span className="text-xl font-bold text-slate-900">{status.totals.carbs}g</span>
-                  <span className="text-xs text-slate-400">/ {activeTargets.carbs}g</span>
+                  <span className="text-2xl font-bold text-white">{status.totals.carbs}g</span>
+                  <span className="text-xs text-zinc-500">/ {activeTargets.carbs}g</span>
                 </div>
-                <div className="w-full h-1.5 bg-pink-100 rounded-full overflow-hidden mt-2">
+                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-2">
                   <div
-                    className="h-full bg-pink-400 transition-transform duration-150 origin-left"
+                    className="h-full bg-yellow-400 transition-transform duration-150 origin-left"
                     style={{ width: `${status.macroPercentages.carbs}%` }}
                   />
                 </div>
               </div>
 
               {/* Fats */}
-              <div className="p-3.5 rounded-2xl bg-teal-50/40 border border-teal-200/70">
-                <span className="text-xs text-teal-600 font-bold">Fats</span>
+              <div className="p-3.5 rounded-2xl bg-[#18181b] border border-zinc-800/90">
+                <span className="text-xs text-zinc-400 font-semibold">Fats</span>
                 <div className="mt-1 flex items-baseline justify-between font-mono tabular-nums">
-                  <span className="text-xl font-bold text-slate-900">{status.totals.fats}g</span>
-                  <span className="text-xs text-slate-400">/ {activeTargets.fats}g</span>
+                  <span className="text-2xl font-bold text-white">{status.totals.fats}g</span>
+                  <span className="text-xs text-zinc-500">/ {activeTargets.fats}g</span>
                 </div>
-                <div className="w-full h-1.5 bg-teal-100 rounded-full overflow-hidden mt-2">
+                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-2">
                   <div
-                    className="h-full bg-teal-400 transition-transform duration-150 origin-left"
+                    className="h-full bg-white transition-transform duration-150 origin-left"
                     style={{ width: `${status.macroPercentages.fats}%` }}
                   />
                 </div>
@@ -242,37 +242,37 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
           </div>
 
           {/* Sugar (<40g) & Saturated Fat (<20g) */}
-          <div className="mt-4 pt-3.5 border-t border-pink-100 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl border border-teal-200/70 bg-teal-50/20">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+          <div className="mt-4 pt-3.5 border-t border-zinc-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl border border-zinc-800 bg-[#18181b]">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
                 {status.sugarOverLimit ? (
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                  <AlertTriangle className="w-4 h-4 text-yellow-400" />
                 ) : (
-                  <CheckCircle2 className="w-4 h-4 text-teal-500" />
+                  <CheckCircle2 className="w-4 h-4 text-[#25e86a]" />
                 )}
                 <span>Sugar (Under 40g)</span>
               </div>
               <span
                 className={`text-xs font-mono font-bold tabular-nums ${
-                  status.sugarOverLimit ? 'text-red-600' : 'text-teal-700'
+                  status.sugarOverLimit ? 'text-yellow-400' : 'text-white'
                 }`}
               >
                 {status.totals.sugar}g / {activeTargets.maxSugar}g
               </span>
             </div>
 
-            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl border border-pink-200/70 bg-pink-50/20">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl border border-zinc-800 bg-[#18181b]">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
                 {status.saturatedFatOverLimit ? (
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                  <AlertTriangle className="w-4 h-4 text-yellow-400" />
                 ) : (
-                  <CheckCircle2 className="w-4 h-4 text-pink-500" />
+                  <CheckCircle2 className="w-4 h-4 text-[#25e86a]" />
                 )}
                 <span>Sat Fat (Under 20g)</span>
               </div>
               <span
                 className={`text-xs font-mono font-bold tabular-nums ${
-                  status.saturatedFatOverLimit ? 'text-red-600' : 'text-pink-700'
+                  status.saturatedFatOverLimit ? 'text-yellow-400' : 'text-white'
                 }`}
               >
                 {status.totals.saturatedFat}g / {activeTargets.maxSaturatedFat}g
@@ -282,29 +282,29 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
         </section>
 
         {/* 4-Column 120 oz Water Tracker */}
-        <section aria-labelledby="water-tracker-heading" className="lg:col-span-4 bg-white border border-teal-200/80 rounded-3xl p-6 flex flex-col justify-between">
+        <section aria-labelledby="water-tracker-heading" className="lg:col-span-4 bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs text-teal-600 font-bold">
-                <Droplets className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-semibold">
+                <Droplets className="w-4 h-4 text-[#25e86a]" />
                 <span>Daily Water</span>
               </div>
-              <span className="text-xs font-mono font-bold text-pink-500 tabular-nums">
+              <span className="text-xs font-mono font-bold text-[#25e86a] tabular-nums">
                 {waterPercentage}%
               </span>
             </div>
-            <h3 id="water-tracker-heading" className="text-lg font-bold text-slate-900 mt-0.5">
+            <h3 id="water-tracker-heading" className="text-lg font-bold text-white mt-0.5">
               120 oz Goal
             </h3>
 
-            <div className="mt-3.5 p-4 rounded-2xl bg-teal-50/40 border border-teal-200/70">
+            <div className="mt-3.5 p-4 rounded-2xl bg-[#18181b] border border-zinc-800/90">
               <div className="flex items-baseline justify-between font-mono tabular-nums">
-                <span className="text-2xl font-bold text-teal-900">{waterOz} oz</span>
-                <span className="text-xs text-teal-600">/ {activeTargets.waterOz} oz</span>
+                <span className="text-2xl font-bold text-white">{waterOz} oz</span>
+                <span className="text-xs text-zinc-500">/ {activeTargets.waterOz} oz</span>
               </div>
-              <div className="w-full h-2 bg-teal-100 rounded-full overflow-hidden mt-2.5">
+              <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden mt-2.5">
                 <div
-                  className="h-full bg-gradient-to-r from-teal-400 to-pink-400 transition-transform duration-150 origin-left"
+                  className="h-full bg-[#25e86a] transition-transform duration-150 origin-left"
                   style={{ width: `${waterPercentage}%` }}
                 />
               </div>
@@ -318,7 +318,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                   key={addOz}
                   type="button"
                   onClick={() => onUpdateWaterOz(waterOz + addOz)}
-                  className="py-2 px-1.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-white text-xs font-mono font-bold transition-colors whitespace-nowrap shrink-0"
+                  className="py-2 px-1.5 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-mono font-bold transition-colors whitespace-nowrap shrink-0"
                 >
                   +{addOz}oz
                 </button>
@@ -328,14 +328,14 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
               <button
                 type="button"
                 onClick={() => onUpdateWaterOz(Math.max(0, waterOz - 8))}
-                className="text-xs text-slate-400 hover:text-pink-600"
+                className="text-xs text-zinc-500 hover:text-zinc-300"
               >
                 -8 oz
               </button>
               <button
                 type="button"
                 onClick={() => onUpdateWaterOz(120)}
-                className="text-xs font-bold text-pink-600 hover:text-pink-700"
+                className="text-xs font-bold text-[#25e86a] hover:underline"
               >
                 Fill to 120 oz
               </button>
@@ -346,20 +346,20 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
 
       {/* Collapsible Recomp Macro Calculator */}
       {showCalculator && (
-        <section aria-labelledby="recomp-calc-heading" className="bg-white border border-teal-200 rounded-3xl p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-teal-100">
+        <section aria-labelledby="recomp-calc-heading" className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-zinc-800/80">
             <div>
-              <h3 id="recomp-calc-heading" className="text-base font-bold text-slate-900">
+              <h3 id="recomp-calc-heading" className="text-base font-bold text-white">
                 Custom Macro Calculator
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-zinc-400">
                 Estimate macros from your weight or stick with the 2,118 cal plan.
               </p>
             </div>
             <button
               type="button"
               onClick={() => onUpdateTargets(PRESCRIBED_TARGETS)}
-              className="px-3.5 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-xs font-bold text-pink-700 whitespace-nowrap shrink-0"
+              className="px-3.5 py-1.5 rounded-full bg-[#1c1c1f] border border-zinc-800 hover:bg-[#27272a] text-xs font-semibold text-white whitespace-nowrap shrink-0"
             >
               Use Prescribed Plan (2,118 cal)
             </button>
@@ -367,45 +367,45 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <label className="block">
-              <span className="text-xs text-slate-600">Current Weight</span>
+              <span className="text-xs text-zinc-400">Current Weight</span>
               <input
                 type="number"
                 value={calcCurrentWeight}
                 onChange={(e) => setCalcCurrentWeight(parseFloat(e.target.value) || 150)}
-                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums border border-teal-200 rounded-xl"
+                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl"
               />
             </label>
             <label className="block">
-              <span className="text-xs text-slate-600">Goal Weight</span>
+              <span className="text-xs text-zinc-400">Goal Weight</span>
               <input
                 type="number"
                 value={calcTargetWeight}
                 onChange={(e) => setCalcTargetWeight(parseFloat(e.target.value) || 140)}
-                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums border border-teal-200 rounded-xl"
+                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl"
               />
             </label>
             <label className="block">
-              <span className="text-xs text-slate-600">Maintenance Cal</span>
+              <span className="text-xs text-zinc-400">Maintenance Cal</span>
               <input
                 type="number"
                 value={calcMaintenance}
                 onChange={(e) => setCalcMaintenance(parseFloat(e.target.value) || 2500)}
-                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums border border-teal-200 rounded-xl"
+                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl"
               />
             </label>
             <label className="block">
-              <span className="text-xs text-slate-600">Deficit % (15–20)</span>
+              <span className="text-xs text-zinc-400">Deficit % (15–20)</span>
               <input
                 type="number"
                 min={10}
                 max={25}
                 value={calcDeficitPct}
                 onChange={(e) => setCalcDeficitPct(parseFloat(e.target.value) || 18)}
-                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums border border-teal-200 rounded-xl"
+                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl"
               />
             </label>
             <label className="block">
-              <span className="text-xs text-slate-600">Protein g/lb</span>
+              <span className="text-xs text-zinc-400">Protein g/lb</span>
               <input
                 type="number"
                 step="0.05"
@@ -413,20 +413,20 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                 max={1.2}
                 value={calcProteinRatio}
                 onChange={(e) => setCalcProteinRatio(parseFloat(e.target.value) || 0.9)}
-                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums border border-teal-200 rounded-xl"
+                className="mt-1 w-full px-3 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl"
               />
             </label>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-teal-50/50 border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <span className="text-xs font-mono font-bold text-teal-900 tabular-nums">
-              Result: {previewCalculatedTargets.calories} cal · {previewCalculatedTargets.protein}g P ·{' '}
+          <div className="p-3.5 rounded-2xl bg-[#18181b] border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span className="text-xs font-mono font-bold text-white tabular-nums">
+              Result: <span className="text-[#25e86a]">{previewCalculatedTargets.calories} cal</span> · {previewCalculatedTargets.protein}g P ·{' '}
               {previewCalculatedTargets.carbs}g C · {previewCalculatedTargets.fats}g F
             </span>
             <button
               type="button"
               onClick={() => onUpdateTargets(previewCalculatedTargets)}
-              className="px-4 py-1.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600 whitespace-nowrap shrink-0"
+              className="px-4 py-1.5 rounded-full bg-[#25e86a] text-black text-xs font-bold hover:bg-[#1ed760] whitespace-nowrap shrink-0"
             >
               Use These Macros
             </button>
@@ -437,30 +437,30 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
       {/* Main Two-Column Approved Food Picker & Today's Log */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left 7 Columns: Approved Food Options */}
-        <section aria-labelledby="approved-foods-heading" className="lg:col-span-7 bg-white border border-teal-200/80 rounded-3xl p-6 space-y-4">
+        <section aria-labelledby="approved-foods-heading" className="lg:col-span-7 bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 id="approved-foods-heading" className="text-base font-bold text-slate-900">
+              <h3 id="approved-foods-heading" className="text-base font-bold text-white">
                 Approved Food List
               </h3>
-              <p className="text-xs text-slate-500">Tap any favorite to add it to today’s log</p>
+              <p className="text-xs text-zinc-400">Tap any favorite to add it to today’s log</p>
             </div>
 
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-teal-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search foods..."
                 aria-label="Filter approved foods"
-                className="pl-8 pr-3 py-1.5 text-xs bg-teal-50/30 border border-teal-200 rounded-2xl text-slate-900 w-full sm:w-44"
+                className="pl-8 pr-3 py-1.5 text-xs bg-[#18181b] border border-zinc-800 rounded-full text-white placeholder:text-zinc-500 w-full sm:w-44"
               />
             </div>
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-teal-50/70 border border-teal-200/60 rounded-2xl">
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#18181b] border border-zinc-800 rounded-2xl">
             {(
               [
                 { id: 'all', label: 'All' },
@@ -476,8 +476,8 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                 onClick={() => setSelectedCategory(tab.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
                   selectedCategory === tab.id
-                    ? 'bg-pink-500 text-white shadow-xs'
-                    : 'text-teal-900 hover:text-pink-600'
+                    ? 'bg-[#25e86a] text-black'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 {tab.label}
@@ -486,7 +486,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
           </div>
 
           {/* Food Rows */}
-          <div className="divide-y divide-pink-100/80 max-h-[540px] overflow-y-auto pr-1">
+          <div className="divide-y divide-zinc-800/80 max-h-[540px] overflow-y-auto pr-1">
             {filteredCatalog.map((item) => {
               const pb2Active = Boolean(item.supportsPb2Addon && pb2Selections[item.id]);
               const effectiveCalories = pb2Active ? item.calories + 60 : item.calories;
@@ -495,22 +495,22 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
               return (
                 <div key={item.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <div className="space-y-0.5">
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
                       <span>{item.subGroup}</span>
                       <span aria-hidden="true">·</span>
                       <span>{item.servingNote}</span>
                       {item.glutenFreeNote && (
                         <>
                           <span aria-hidden="true">·</span>
-                          <span className="text-teal-600 font-semibold">GF</span>
+                          <span className="text-yellow-400 font-semibold">GF</span>
                         </>
                       )}
                     </div>
-                    <p className="text-sm font-bold text-slate-900">{item.name}</p>
-                    <div className="flex flex-wrap items-center gap-2 text-xs font-mono tabular-nums text-slate-500">
-                      <span className="font-bold text-pink-600">{effectiveCalories} cal</span>
+                    <p className="text-sm font-bold text-white">{item.name}</p>
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-mono tabular-nums text-zinc-400">
+                      <span className="font-bold text-[#25e86a]">{effectiveCalories} cal</span>
                       <span aria-hidden="true">·</span>
-                      <span className="text-teal-600 font-bold">{effectiveProtein}g P</span>
+                      <span className="text-white font-semibold">{effectiveProtein}g P</span>
                       <span aria-hidden="true">·</span>
                       <span>{item.carbs + (pb2Active ? 5 : 0)}g C</span>
                       <span aria-hidden="true">·</span>
@@ -518,7 +518,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                     </div>
 
                     {item.supportsPb2Addon && (
-                      <label className="inline-flex items-center gap-1.5 text-xs text-pink-600 font-semibold cursor-pointer pt-0.5">
+                      <label className="inline-flex items-center gap-1.5 text-xs text-zinc-300 font-medium cursor-pointer pt-0.5">
                         <input
                           type="checkbox"
                           checked={pb2Active}
@@ -528,7 +528,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                               [item.id]: e.target.checked,
                             }))
                           }
-                          className="rounded border-pink-300 text-pink-500"
+                          className="rounded border-zinc-700 accent-[#25e86a]"
                         />
                         <span>+ PB2 Powder (+60 cal, +6g P)</span>
                       </label>
@@ -545,7 +545,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                               [item.id]: e.target.value,
                             }))
                           }
-                          className="px-2 py-1 text-xs bg-teal-50/50 border border-teal-200 rounded-lg text-slate-700"
+                          className="px-2 py-1 text-xs bg-[#18181b] border border-zinc-800 rounded-lg text-zinc-200"
                         >
                           {item.variants.map((v) => (
                             <option key={v} value={v}>
@@ -561,7 +561,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                     type="button"
                     onClick={() => handleQuickLogApproved(item)}
                     aria-label={`Log ${item.name}`}
-                    className="px-3.5 py-1.5 rounded-2xl bg-teal-500 hover:bg-teal-600 text-white text-xs font-bold flex items-center gap-1 whitespace-nowrap shrink-0 self-start sm:self-center"
+                    className="px-3.5 py-1.5 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold flex items-center gap-1 whitespace-nowrap shrink-0 self-start sm:self-center"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Add
@@ -574,38 +574,38 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
 
         {/* Right 5 Columns: Today's Logged Meals & Custom Add */}
         <div className="lg:col-span-5 space-y-5">
-          <section aria-labelledby="todays-log-heading" className="bg-white border border-pink-200/80 rounded-3xl p-6 space-y-3">
-            <div className="flex items-center justify-between pb-2.5 border-b border-pink-100">
-              <h3 id="todays-log-heading" className="text-base font-bold text-slate-900">
+          <section aria-labelledby="todays-log-heading" className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 space-y-3">
+            <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800/80">
+              <h3 id="todays-log-heading" className="text-base font-bold text-white">
                 Today’s Food Log
               </h3>
-              <span className="text-xs text-pink-600 font-mono font-bold tabular-nums">
+              <span className="text-xs text-[#25e86a] font-mono font-bold tabular-nums">
                 {status.totals.calories} / {activeTargets.calories} cal
               </span>
             </div>
 
             {foodLogs.length === 0 ? (
               <div className="py-8 text-center">
-                <p className="text-xs font-semibold text-slate-500">Nothing logged yet today!</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-xs font-semibold text-zinc-300">Nothing logged yet today!</p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
                   Tap "Add" on any food on the left to get started.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-pink-100 max-h-[340px] overflow-y-auto pr-1">
+              <div className="divide-y divide-zinc-800/80 max-h-[340px] overflow-y-auto pr-1">
                 {foodLogs.map((entry) => (
                   <div key={entry.id} className="py-2.5 flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-xs font-bold text-slate-900">{entry.name}</p>
-                      <p className="text-[11px] text-slate-500 font-mono tabular-nums">
-                        {entry.calories} cal · {entry.protein}g P · {entry.carbs}g C · {entry.fats}g F
+                      <p className="text-xs font-bold text-white">{entry.name}</p>
+                      <p className="text-[11px] text-zinc-400 font-mono tabular-nums">
+                        <span className="text-[#25e86a] font-bold">{entry.calories} cal</span> · {entry.protein}g P · {entry.carbs}g C · {entry.fats}g F
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => onRemoveFoodLog(entry.id)}
                       aria-label={`Remove ${entry.name} from log`}
-                      className="p-1.5 rounded-xl text-slate-400 hover:text-pink-600 hover:bg-pink-50 transition-colors shrink-0"
+                      className="p-1.5 rounded-full text-zinc-500 hover:text-red-400 hover:bg-[#1c1c1f] transition-colors shrink-0"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -616,14 +616,14 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
           </section>
 
           {/* Concise Custom Food Entry */}
-          <section aria-labelledby="custom-food-heading" className="bg-white border border-teal-200/80 rounded-3xl p-6">
-            <h3 id="custom-food-heading" className="text-sm font-bold text-slate-900">
+          <section aria-labelledby="custom-food-heading" className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6">
+            <h3 id="custom-food-heading" className="text-sm font-bold text-white">
               Quick-Add Custom Food
             </h3>
 
             <form onSubmit={handleCustomSubmit} className="mt-3 space-y-2.5">
               {customError && (
-                <p role="alert" className="text-xs font-medium text-red-600">
+                <p role="alert" className="text-xs font-medium text-yellow-400">
                   {customError}
                 </p>
               )}
@@ -633,75 +633,75 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="Food or meal name..."
                 aria-label="Custom food name"
-                className="w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-2xl text-slate-900"
+                className="w-full px-3 py-2 text-xs bg-[#18181b] border border-zinc-800 rounded-2xl text-white placeholder:text-zinc-500"
               />
 
               <div className="grid grid-cols-3 gap-2">
-                <label className="block text-[11px] text-slate-500">
+                <label className="block text-[11px] text-zinc-400">
                   Calories
                   <input
                     type="number"
                     value={customCalories}
                     onChange={(e) => setCustomCalories(e.target.value)}
                     placeholder="250"
-                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-xl"
+                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl placeholder:text-zinc-600"
                   />
                 </label>
-                <label className="block text-[11px] text-slate-500">
+                <label className="block text-[11px] text-zinc-400">
                   Protein (g)
                   <input
                     type="number"
                     value={customProtein}
                     onChange={(e) => setCustomProtein(e.target.value)}
                     placeholder="25"
-                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-xl"
+                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl placeholder:text-zinc-600"
                   />
                 </label>
-                <label className="block text-[11px] text-slate-500">
+                <label className="block text-[11px] text-zinc-400">
                   Carbs (g)
                   <input
                     type="number"
                     value={customCarbs}
                     onChange={(e) => setCustomCarbs(e.target.value)}
                     placeholder="20"
-                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-xl"
+                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl placeholder:text-zinc-600"
                   />
                 </label>
-                <label className="block text-[11px] text-slate-500">
+                <label className="block text-[11px] text-zinc-400">
                   Fats (g)
                   <input
                     type="number"
                     value={customFats}
                     onChange={(e) => setCustomFats(e.target.value)}
                     placeholder="6"
-                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-xl"
+                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl placeholder:text-zinc-600"
                   />
                 </label>
-                <label className="block text-[11px] text-slate-500">
+                <label className="block text-[11px] text-zinc-400">
                   Sugar (g)
                   <input
                     type="number"
                     value={customSugar}
                     onChange={(e) => setCustomSugar(e.target.value)}
                     placeholder="0"
-                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-xl"
+                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl placeholder:text-zinc-600"
                   />
                 </label>
-                <label className="block text-[11px] text-slate-500">
+                <label className="block text-[11px] text-zinc-400">
                   Sat Fat (g)
                   <input
                     type="number"
                     value={customSatFat}
                     onChange={(e) => setCustomSatFat(e.target.value)}
                     placeholder="0"
-                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-xl"
+                    className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-[#18181b] text-white border border-zinc-800 rounded-xl placeholder:text-zinc-600"
                   />
                 </label>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2 px-4 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition-colors"
+                className="w-full py-2.5 px-4 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold transition-colors"
               >
                 Add Custom Food
               </button>

@@ -90,7 +90,7 @@ define(['./workbox-afac4cd2'], (function (workbox) { 'use strict';
     "revision": "5791c31a115c5a81475b4daadc579a3c"
   }, {
     "url": "index.html",
-    "revision": "d3ec108092a9ac0ea988448299a9f939"
+    "revision": "3086491a217639c3954ff9c996d97352"
   }, {
     "url": "icon.svg",
     "revision": "5790c38f963c15badc3d251ef1b3d7a9"
@@ -126,7 +126,7 @@ define(['./workbox-afac4cd2'], (function (workbox) { 'use strict';
     "revision": "1fc645669757a3ddfe2d36bba595f9c8"
   }, {
     "url": "manifest.webmanifest",
-    "revision": "f926457098b0ee4b13b32f2fee7339bd"
+    "revision": "e101a811a94e8ddb4a171fcb0e344b53"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html")));

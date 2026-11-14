@@ -25,8 +25,8 @@ export default defineConfig(() => {
           short_name: 'SparklyDrow',
           description:
             'Ankle-friendly 4-day workout split, 2,118 cal macro & 120 oz water tracker.',
-          theme_color: '#14b8a6',
-          background_color: '#f0fdfa',
+          theme_color: '#000000',
+          background_color: '#000000',
           display: 'standalone',
           orientation: 'portrait',
           start_url: './',

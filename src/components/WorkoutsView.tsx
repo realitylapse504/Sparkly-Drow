@@ -237,14 +237,14 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Compact, Bubbly Weekly Schedule Strip with Per-Day Workout Scheduling */}
-      <section aria-labelledby="split-schedule-heading" className="bg-white border border-teal-200/80 rounded-3xl p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-pink-100">
+      {/* Compact Weekly Schedule Strip with Per-Day Workout Scheduling */}
+      <section aria-labelledby="split-schedule-heading" className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800/80">
           <div>
-            <h2 id="split-schedule-heading" className="text-lg font-bold text-slate-900">
+            <h2 id="split-schedule-heading" className="text-lg font-bold text-white">
               Weekly Split Schedule
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-zinc-400">
               Goal: 1x Full-Body + 2–4 Split Days · Auto-resets every Monday for a fresh week!
             </p>
           </div>
@@ -253,9 +253,9 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               <button
                 type="button"
                 onClick={() => onResetWorkoutDay(activeWorkout.id)}
-                className="px-3 py-2 rounded-2xl border border-pink-200 bg-pink-50/70 hover:bg-pink-100 text-xs font-bold text-pink-700 flex items-center gap-1 whitespace-nowrap"
+                className="px-3.5 py-2 rounded-full border border-zinc-800 bg-[#1c1c1f] hover:bg-[#27272a] text-xs font-semibold text-zinc-200 flex items-center gap-1.5 whitespace-nowrap"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3.5 h-3.5 text-yellow-400" />
                 Reset Highlighted Day
               </button>
             )}
@@ -263,9 +263,9 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               <button
                 type="button"
                 onClick={onResetWeek}
-                className="px-3 py-2 rounded-2xl border border-teal-200 bg-teal-50/70 hover:bg-teal-100 text-xs font-bold text-teal-800 flex items-center gap-1 whitespace-nowrap"
+                className="px-3.5 py-2 rounded-full border border-zinc-800 bg-[#1c1c1f] hover:bg-[#27272a] text-xs font-semibold text-zinc-200 flex items-center gap-1.5 whitespace-nowrap"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3.5 h-3.5 text-[#25e86a]" />
                 Reset Week ({completedSessionsThisWeek.length} Done)
               </button>
             )}
@@ -273,7 +273,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               <button
                 type="button"
                 onClick={onResetScheduleOverrides}
-                className="px-3 py-2 rounded-2xl border border-teal-200 bg-teal-50/60 hover:bg-teal-100 text-xs font-bold text-teal-800 whitespace-nowrap"
+                className="px-3.5 py-2 rounded-full border border-zinc-800 bg-[#1c1c1f] hover:bg-[#27272a] text-xs font-semibold text-zinc-200 whitespace-nowrap"
               >
                 Reset Schedule
               </button>
@@ -281,7 +281,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
             <button
               type="button"
               onClick={() => setShowBuilder((prev) => !prev)}
-              className="px-4 py-2 rounded-2xl bg-gradient-to-r from-teal-500 to-pink-500 hover:opacity-95 text-white text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shadow-xs"
+              className="px-4 py-2 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold flex items-center gap-1.5 whitespace-nowrap"
             >
               {showBuilder ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
               {showBuilder ? 'Close Builder' : 'New Custom Workout'}
@@ -293,23 +293,23 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
         {showBuilder && (
           <form
             onSubmit={handleCreateCustomSubmit}
-            className="p-5 rounded-3xl bg-gradient-to-br from-teal-50/70 via-white to-pink-50/70 border border-pink-200 space-y-4"
+            className="p-5 rounded-3xl bg-[#18181b] border border-zinc-800 space-y-4"
           >
             <div className="flex items-center justify-between gap-2">
               <div>
-                <span className="text-xs font-bold text-pink-600">Saved Forever in Your Library</span>
-                <h3 className="text-base font-bold text-slate-900">Create Custom Workout</h3>
+                <span className="text-xs font-bold text-[#25e86a]">Saved Forever in Your Library</span>
+                <h3 className="text-base font-bold text-white">Create Custom Workout</h3>
               </div>
             </div>
 
             {builderError && (
-              <p role="alert" className="text-xs font-semibold text-red-600">
+              <p role="alert" className="text-xs font-semibold text-red-400">
                 {builderError}
               </p>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <label className="block text-xs text-slate-600 font-medium">
+              <label className="block text-xs text-zinc-400 font-medium">
                 Workout Name
                 <input
                   type="text"
@@ -317,11 +317,11 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   onChange={(e) => setCustomTitle(e.target.value)}
                   placeholder="e.g., Glute & Core Sculpt"
                   aria-label="Custom workout name"
-                  className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                  className="mt-1 w-full px-3 py-2 text-xs bg-[#0d0d0f] border border-zinc-800 rounded-xl text-white placeholder:text-zinc-600"
                 />
               </label>
 
-              <label className="block text-xs text-slate-600 font-medium">
+              <label className="block text-xs text-zinc-400 font-medium">
                 Focus / Notes
                 <input
                   type="text"
@@ -329,17 +329,17 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   onChange={(e) => setCustomSubtitle(e.target.value)}
                   placeholder="e.g., Booty bands, kickbacks & abs"
                   aria-label="Custom workout focus"
-                  className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                  className="mt-1 w-full px-3 py-2 text-xs bg-[#0d0d0f] border border-zinc-800 rounded-xl text-white placeholder:text-zinc-600"
                 />
               </label>
 
-              <label className="block text-xs text-slate-600 font-medium">
+              <label className="block text-xs text-zinc-400 font-medium">
                 Schedule on Day (Optional)
                 <select
                   value={customAssignDay}
                   onChange={(e) => setCustomAssignDay(e.target.value)}
                   aria-label="Schedule custom workout on day"
-                  className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                  className="mt-1 w-full px-3 py-2 text-xs bg-[#0d0d0f] border border-zinc-800 rounded-xl text-white"
                 >
                   <option value="">Save to Library (Any Day)</option>
                   <option value="Mon">Monday</option>
@@ -353,12 +353,12 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               </label>
             </div>
 
-            <label className="inline-flex items-center gap-2 text-xs font-semibold text-teal-800 cursor-pointer">
+            <label className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-300 cursor-pointer">
               <input
                 type="checkbox"
                 checked={customAnkleProtected}
                 onChange={(e) => setCustomAnkleProtected(e.target.checked)}
-                className="rounded border-teal-300 text-teal-600"
+                className="rounded border-zinc-700 accent-[#25e86a]"
               />
               <span>Lower-Body / Ankle-Friendly Session</span>
             </label>
@@ -366,13 +366,13 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
             {/* Exercise Rows */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">Exercises</span>
+                <span className="text-xs font-bold text-white">Exercises</span>
                 <button
                   type="button"
                   onClick={handleAddDraftRow}
-                  className="px-3 py-1 rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-900 text-xs font-bold flex items-center gap-1"
+                  className="px-3 py-1 rounded-full bg-[#121214] border border-zinc-800 hover:bg-[#222226] text-zinc-200 text-xs font-semibold flex items-center gap-1"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 text-[#25e86a]" />
                   Add Exercise
                 </button>
               </div>
@@ -380,10 +380,10 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               {draftExercises.map((row, idx) => (
                 <div
                   key={idx}
-                  className="p-3 rounded-2xl bg-white border border-teal-200/80 grid grid-cols-1 sm:grid-cols-12 gap-2 items-end"
+                  className="p-3 rounded-2xl bg-[#121214] border border-zinc-800 grid grid-cols-1 sm:grid-cols-12 gap-2 items-end"
                 >
                   <div className="sm:col-span-4 space-y-1">
-                    <label className="block text-[11px] text-slate-500">
+                    <label className="block text-[11px] text-zinc-400">
                       Quick-Pick Preferred Exercise (or type below)
                       <select
                         value=""
@@ -408,7 +408,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                           }
                         }}
                         aria-label={`Quick-pick preferred exercise for row ${idx + 1}`}
-                        className="mt-0.5 w-full px-2 py-1 text-[11px] bg-teal-50/60 border border-teal-200 rounded-lg text-teal-900 font-medium"
+                        className="mt-0.5 w-full px-2 py-1 text-[11px] bg-[#18181b] border border-zinc-800 rounded-lg text-white font-medium"
                       >
                         <option value="">Choose from Preferred Exercise Pool...</option>
                         {(
@@ -435,18 +435,18 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                         ))}
                       </select>
                     </label>
-                    <label className="block text-[11px] text-slate-500">
+                    <label className="block text-[11px] text-zinc-400">
                       Exercise #{idx + 1} Name
                       <input
                         type="text"
                         value={row.name}
                         onChange={(e) => handleUpdateDraftExercise(idx, 'name', e.target.value)}
                         placeholder="e.g., Barbell Hip Thrust"
-                        className="mt-0.5 w-full px-2.5 py-1.5 text-xs bg-white border border-teal-200 rounded-lg text-slate-900"
+                        className="mt-0.5 w-full px-2.5 py-1.5 text-xs bg-[#18181b] border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600"
                       />
                     </label>
                   </div>
-                  <label className="sm:col-span-2 block text-[11px] text-slate-500">
+                  <label className="sm:col-span-2 block text-[11px] text-zinc-400">
                     Sets
                     <input
                       type="number"
@@ -454,37 +454,37 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                       max={10}
                       value={row.sets}
                       onChange={(e) => handleUpdateDraftExercise(idx, 'sets', e.target.value)}
-                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-teal-200 rounded-lg text-slate-900"
+                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-[#18181b] border border-zinc-800 rounded-lg text-white"
                     />
                   </label>
-                  <label className="sm:col-span-2 block text-[11px] text-slate-500">
+                  <label className="sm:col-span-2 block text-[11px] text-zinc-400">
                     Reps
                     <input
                       type="text"
                       value={row.reps}
                       onChange={(e) => handleUpdateDraftExercise(idx, 'reps', e.target.value)}
                       placeholder="10–12 reps"
-                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-teal-200 rounded-lg text-slate-900"
+                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-[#18181b] border border-zinc-800 rounded-lg text-white"
                     />
                   </label>
-                  <label className="sm:col-span-2 block text-[11px] text-slate-500">
+                  <label className="sm:col-span-2 block text-[11px] text-zinc-400">
                     Weight (lbs)
                     <input
                       type="number"
                       value={row.weightLbs}
                       onChange={(e) => handleUpdateDraftExercise(idx, 'weightLbs', e.target.value)}
-                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-teal-200 rounded-lg text-slate-900"
+                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs font-mono bg-[#18181b] border border-zinc-800 rounded-lg text-white"
                     />
                   </label>
                   <div className="sm:col-span-2 flex items-center gap-1.5">
-                    <label className="flex-1 block text-[11px] text-slate-500">
+                    <label className="flex-1 block text-[11px] text-zinc-400">
                       Form Tip
                       <input
                         type="text"
                         value={row.tip}
                         onChange={(e) => handleUpdateDraftExercise(idx, 'tip', e.target.value)}
                         placeholder="Optional tip"
-                        className="mt-0.5 w-full px-2 py-1.5 text-xs bg-white border border-teal-200 rounded-lg text-slate-900"
+                        className="mt-0.5 w-full px-2 py-1.5 text-xs bg-[#18181b] border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600"
                       />
                     </label>
                     {draftExercises.length > 1 && (
@@ -492,7 +492,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                         type="button"
                         onClick={() => handleRemoveDraftRow(idx)}
                         aria-label={`Remove exercise ${idx + 1}`}
-                        className="p-1.5 text-slate-400 hover:text-pink-600 rounded-lg mb-0.5"
+                        className="p-1.5 text-zinc-500 hover:text-red-400 rounded-lg mb-0.5"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -506,13 +506,13 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               <button
                 type="button"
                 onClick={() => setShowBuilder(false)}
-                className="px-4 py-2 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 rounded-full border border-zinc-800 bg-[#121214] text-xs font-semibold text-zinc-300 hover:bg-[#1c1c1f]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold shadow-xs"
+                className="px-5 py-2 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold"
               >
                 Save Custom Workout
               </button>
@@ -535,25 +535,26 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                 key={item.day}
                 className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between gap-2 ${
                   isSelected
-                    ? 'border-pink-400 bg-gradient-to-b from-pink-500 to-pink-600 text-white shadow-xs'
+                    ? 'border-[#25e86a] bg-[#18181b] text-white'
                     : item.isRest
-                    ? 'border-pink-100 bg-pink-50/40 text-slate-500'
-                    : 'border-teal-200/80 bg-white text-slate-900 hover:border-pink-300'
+                    ? 'border-zinc-900 bg-[#0d0d0f] text-zinc-500'
+                    : 'border-zinc-800/90 bg-[#18181b] text-white hover:border-zinc-700'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-1 text-xs">
-                    <span className={isSelected ? 'text-pink-100 font-bold' : 'text-teal-600 font-bold'}>
+                    <span className={isSelected ? 'text-[#25e86a] font-bold' : 'text-zinc-400 font-semibold'}>
                       {item.day}
                     </span>
                     {isDone && (
-                      <span className={`font-mono text-[10px] font-bold ${isSelected ? 'text-white' : 'text-teal-600'}`}>
+                      <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-yellow-400">
+                        <span className="w-2 h-2 rounded-full bg-yellow-400" />
                         Done
                       </span>
                     )}
                   </div>
-                  <p className="font-bold text-xs sm:text-sm mt-1 leading-snug">{item.session}</p>
-                  <p className={`text-[11px] mt-0.5 ${isSelected ? 'text-pink-100' : 'text-slate-400'}`}>
+                  <p className="font-bold text-xs sm:text-sm mt-1 leading-snug text-white">{item.session}</p>
+                  <p className="text-[11px] mt-0.5 text-zinc-400">
                     {item.type}
                   </p>
                 </div>
@@ -569,11 +570,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                         onSelectWorkoutId(val);
                       }
                     }}
-                    className={`w-full px-2 py-1 rounded-lg text-[10px] font-semibold border cursor-pointer ${
-                      isSelected
-                        ? 'bg-pink-700/60 border-pink-300 text-white'
-                        : 'bg-teal-50/60 border-teal-200/80 text-slate-700'
-                    }`}
+                    className="w-full px-2 py-1 rounded-lg text-[10px] font-medium border bg-[#121214] border-zinc-800 text-zinc-300 cursor-pointer"
                   >
                     <optgroup label="Programmed Split">
                       <option value="upper_a">Upper Body A</option>
@@ -601,10 +598,10 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onSelectWorkoutId(item.workoutId!)}
-                      className={`w-full py-1 px-2 rounded-xl text-[11px] font-bold transition-colors whitespace-nowrap shrink-0 ${
+                      className={`w-full py-1 px-2 rounded-full text-[11px] font-bold transition-colors whitespace-nowrap shrink-0 ${
                         isSelected
-                          ? 'bg-white text-pink-600'
-                          : 'bg-teal-50 text-teal-800 hover:bg-pink-100 hover:text-pink-800'
+                          ? 'bg-[#25e86a] text-black'
+                          : 'bg-[#121214] border border-zinc-800 text-zinc-300 hover:bg-[#222226]'
                       }`}
                     >
                       {isSelected ? 'Viewing' : 'Open'}
@@ -620,9 +617,9 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
       {/* Main Two-Column Workout Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left 8 Columns: Active Workout Session */}
-        <div className="lg:col-span-8 bg-white border border-pink-200/80 rounded-3xl p-6 space-y-5">
+        <div className="lg:col-span-8 bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 space-y-5">
           {/* Segmented Session Selector (Built-In + Saved Custom Workouts) */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-teal-50/70 border border-teal-200/60 rounded-2xl" role="tablist" aria-label="Select workout session">
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#18181b] border border-zinc-800 rounded-2xl" role="tablist" aria-label="Select workout session">
             {allWorkoutPlans.map((plan) => {
               const active = plan.id === activeWorkoutId;
               const completed = completedSessionsThisWeek.includes(plan.id);
@@ -635,8 +632,8 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   onClick={() => onSelectWorkoutId(plan.id)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
                     active
-                      ? 'bg-pink-500 text-white shadow-xs'
-                      : 'text-teal-900 hover:text-pink-600'
+                      ? 'bg-[#25e86a] text-black'
+                      : 'text-zinc-400 hover:text-white'
                   }`}
                 >
                   {plan.id === 'upper_a' && 'Mon · Upper A'}
@@ -652,17 +649,17 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
           </div>
 
           {/* Session Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-pink-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
             <div>
-              <div className="flex items-center gap-2 text-xs text-teal-600 font-semibold">
-                <span>{activeWorkout.dayLabel}</span>
+              <div className="flex items-center gap-2 text-xs text-zinc-400 font-semibold">
+                <span className="text-white">{activeWorkout.dayLabel}</span>
                 <span aria-hidden="true">·</span>
-                <span className="font-mono tabular-nums text-slate-500">
+                <span className="font-mono tabular-nums text-[#25e86a]">
                   {completedSetsInActive}/{totalSetsInActive} sets done
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mt-0.5">{activeWorkout.title}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">{activeWorkout.subtitle}</p>
+              <h3 className="text-xl font-bold text-white mt-0.5">{activeWorkout.title}</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">{activeWorkout.subtitle}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -671,7 +668,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   type="button"
                   onClick={() => onDeleteCustomWorkout(activeWorkout.id)}
                   aria-label={`Delete custom workout ${activeWorkout.title}`}
-                  className="px-3 py-2.5 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold flex items-center gap-1"
+                  className="px-3 py-2.5 rounded-full border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-bold flex items-center gap-1"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
@@ -682,19 +679,19 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   type="button"
                   onClick={() => onResetWorkoutDay(activeWorkout.id)}
                   aria-label={`Reset workout for ${activeWorkout.title}`}
-                  className="px-3.5 py-2.5 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                  className="px-3.5 py-2.5 rounded-full border border-zinc-800 bg-[#1c1c1f] hover:bg-[#27272a] text-zinc-200 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-3.5 h-3.5 text-yellow-400" />
                   Reset Workout
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => onCompleteSession(activeWorkout.id)}
-                className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                className={`px-4 py-2.5 rounded-full text-xs font-bold transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
                   isCurrentSessionLogged
-                    ? 'bg-teal-500 text-white'
-                    : 'bg-pink-500 text-white hover:bg-pink-600'
+                    ? 'bg-[#25e86a]/15 border border-[#25e86a]/40 text-[#25e86a]'
+                    : 'bg-[#25e86a] text-black hover:bg-[#1ed760]'
                 }`}
               >
                 <Check className="w-4 h-4" />
@@ -711,22 +708,22 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               const displayedReps = isSwapped ? exercise.ankleSwapOption!.swapReps : exercise.reps;
 
               return (
-                <div key={exercise.id} className="border border-teal-200/70 rounded-2xl p-4">
+                <div key={exercise.id} className="bg-[#18181b] border border-zinc-800/90 rounded-2xl p-4">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2 text-xs font-mono font-bold tabular-nums">
-                        <span className="text-pink-500">#{exercise.order}</span>
-                        <span aria-hidden="true">·</span>
-                        <span className="text-teal-700">
+                        <span className="text-yellow-400">#{exercise.order}</span>
+                        <span aria-hidden="true" className="text-zinc-600">·</span>
+                        <span className="text-[#25e86a]">
                           {exercise.sets} sets × {displayedReps}
                         </span>
                       </div>
-                      <h4 className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">{displayedName}</h4>
+                      <h4 className="text-sm sm:text-base font-bold text-white mt-0.5">{displayedName}</h4>
                       {exercise.tip && (
-                        <p className="text-xs text-slate-500 mt-0.5">{exercise.tip}</p>
+                        <p className="text-xs text-zinc-400 mt-0.5">{exercise.tip}</p>
                       )}
                       {isSwapped && exercise.ankleSwapOption && (
-                        <p className="text-xs text-teal-700 mt-0.5 font-medium">
+                        <p className="text-xs text-yellow-400 mt-0.5 font-medium">
                           {exercise.ankleSwapOption.swapReason}
                         </p>
                       )}
@@ -736,9 +733,9 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                       <button
                         type="button"
                         onClick={onToggleLungeSwap}
-                        className="px-3 py-1.5 rounded-xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-xs font-bold text-pink-700 flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                        className="px-3 py-1.5 rounded-full border border-zinc-700 bg-[#121214] hover:bg-[#222226] text-xs font-semibold text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0"
                       >
-                        <ArrowLeftRight className="w-3.5 h-3.5" />
+                        <ArrowLeftRight className="w-3.5 h-3.5 text-yellow-400" />
                         {lungeSwappedToBss
                           ? 'Switch to Dumbbell Low Box Step-Up (MAX)'
                           : 'Ankle Swap: Single-Leg Hip Thrust (MED)'}
@@ -747,7 +744,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   </div>
 
                   {/* Set Table */}
-                  <div className="mt-3 pt-3 border-t border-teal-100/80 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="mt-3 pt-3 border-t border-zinc-800/80 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     {Array.from({ length: exercise.sets }, (_, idx) => {
                       const setNum = idx + 1;
                       const key = `${exercise.id}_set_${setNum}`;
@@ -762,22 +759,22 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                           key={key}
                           className={`p-2.5 rounded-xl border flex flex-col gap-2 ${
                             log.completed
-                              ? 'border-teal-400 bg-teal-50/60'
-                              : 'border-pink-100 bg-pink-50/20'
+                              ? 'border-[#25e86a]/50 bg-[#121214]'
+                              : 'border-zinc-800 bg-[#121214]'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-mono font-bold text-slate-600 tabular-nums">
+                            <span className="text-xs font-mono font-bold text-zinc-300 tabular-nums">
                               Set {setNum}
                             </span>
                             <button
                               type="button"
                               onClick={() => handleToggleSet(key)}
                               aria-label={`Mark ${displayedName} Set ${setNum} complete`}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
+                              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
                                 log.completed
-                                  ? 'bg-teal-500 text-white'
-                                  : 'bg-white border border-pink-200 text-pink-600 hover:bg-pink-50'
+                                  ? 'bg-[#25e86a] text-black'
+                                  : 'bg-[#1c1c1f] border border-zinc-800 text-zinc-300 hover:bg-[#27272a]'
                               }`}
                             >
                               {log.completed ? 'Done' : 'Check'}
@@ -786,21 +783,21 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
 
                           <div className="grid grid-cols-2 gap-2">
                             <label className="block">
-                              <span className="text-[10px] text-slate-400 block">Weight (lbs)</span>
+                              <span className="text-[10px] text-zinc-500 block">Weight (lbs)</span>
                               <input
                                 type="number"
                                 value={log.weightLbs}
                                 onChange={(e) => handleWeightChange(key, parseFloat(e.target.value))}
-                                className="mt-0.5 w-full px-2 py-1 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-lg text-slate-900"
+                                className="mt-0.5 w-full px-2 py-1 text-xs font-mono tabular-nums bg-[#18181b] border border-zinc-800 rounded-lg text-white"
                               />
                             </label>
                             <label className="block">
-                              <span className="text-[10px] text-slate-400 block">Reps</span>
+                              <span className="text-[10px] text-zinc-500 block">Reps</span>
                               <input
                                 type="text"
                                 value={log.repsCompleted}
                                 onChange={(e) => handleRepsChange(key, e.target.value)}
-                                className="mt-0.5 w-full px-2 py-1 text-xs font-mono tabular-nums bg-white border border-teal-200 rounded-lg text-slate-900"
+                                className="mt-0.5 w-full px-2 py-1 text-xs font-mono tabular-nums bg-[#18181b] border border-zinc-800 rounded-lg text-white"
                               />
                             </label>
                           </div>
@@ -817,18 +814,18 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
         {/* Right 4 Columns: Concise Left Ankle Care & Low-Impact Cardio */}
         <div className="lg:col-span-4 space-y-5">
           {/* Left Ankle Warm-Up */}
-          <section aria-labelledby="ankle-protocol-heading" className="bg-white border border-teal-200/80 rounded-3xl p-6 space-y-4">
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-teal-100">
+          <section aria-labelledby="ankle-protocol-heading" className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-zinc-800/80">
               <div>
-                <div className="flex items-center gap-1.5 text-xs text-pink-600 font-bold">
+                <div className="flex items-center gap-1.5 text-xs text-yellow-400 font-bold">
                   <ShieldAlert className="w-4 h-4 shrink-0" />
                   <span>Left Ankle Care</span>
                 </div>
-                <h3 id="ankle-protocol-heading" className="text-base font-bold text-slate-900 mt-0.5">
+                <h3 id="ankle-protocol-heading" className="text-base font-bold text-white mt-0.5">
                   Leg Day Warm-Up
                 </h3>
               </div>
-              <span className="text-xs font-mono font-bold text-teal-600 tabular-nums">
+              <span className="text-xs font-mono font-bold text-[#25e86a] tabular-nums">
                 {warmupCompletedCount}/3
               </span>
             </div>
@@ -840,24 +837,26 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   <div
                     key={step.id}
                     className={`p-3 rounded-2xl border transition-colors ${
-                      checked ? 'border-teal-400 bg-teal-50/50' : 'border-pink-100 bg-pink-50/20'
+                      checked
+                        ? 'border-[#25e86a]/50 bg-[#18181b]'
+                        : 'border-zinc-800 bg-[#18181b]'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div>
-                        <p className="text-xs font-bold text-slate-900">
-                          {step.title} <span className="font-mono font-normal text-teal-700">({step.prescription})</span>
+                        <p className="text-xs font-bold text-white">
+                          {step.title} <span className="font-mono font-normal text-zinc-400">({step.prescription})</span>
                         </p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{step.detail}</p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">{step.detail}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => onToggleAnkleWarmup(step.id)}
                         aria-label={`Toggle ${step.title} warm-up completion`}
-                        className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
                           checked
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-white border border-pink-200 text-pink-600 hover:bg-pink-50'
+                            ? 'bg-[#25e86a] text-black'
+                            : 'bg-[#121214] border border-zinc-800 text-zinc-300 hover:bg-[#222226]'
                         }`}
                       >
                         {checked ? 'Done' : 'Check'}
@@ -865,15 +864,15 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                     </div>
 
                     {step.hasTimer && (
-                      <div className="mt-2.5 pt-2 border-t border-teal-100 flex items-center justify-between gap-2">
-                        <span className="text-xs font-mono tabular-nums text-slate-600">
-                          Timer: <strong>{stretchSecondsLeft}s</strong>
+                      <div className="mt-2.5 pt-2 border-t border-zinc-800 flex items-center justify-between gap-2">
+                        <span className="text-xs font-mono tabular-nums text-zinc-400">
+                          Timer: <strong className="text-white">{stretchSecondsLeft}s</strong>
                         </span>
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => setStretchTimerRunning((prev) => !prev)}
-                            className="px-2.5 py-1 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold flex items-center gap-1 whitespace-nowrap shrink-0"
+                            className="px-3 py-1 rounded-full bg-[#25e86a] hover:bg-[#1ed760] text-black text-xs font-bold flex items-center gap-1 whitespace-nowrap shrink-0"
                           >
                             <Timer className="w-3.5 h-3.5" />
                             {stretchTimerRunning ? 'Pause' : '30s Timer'}
@@ -885,7 +884,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                               setStretchSecondsLeft(30);
                             }}
                             aria-label="Reset 30 second stretch timer"
-                            className="p-1 rounded-lg border border-teal-200 bg-white text-teal-700 hover:text-pink-600"
+                            className="p-1 rounded-full border border-zinc-800 bg-[#121214] text-zinc-400 hover:text-white"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                           </button>
@@ -898,18 +897,18 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
             </div>
 
             {/* Flat Shoes Check */}
-            <div className="pt-2 border-t border-teal-100 flex items-center justify-between gap-2">
+            <div className="pt-2 border-t border-zinc-800 flex items-center justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-slate-900">Flat Shoes On</p>
-                <p className="text-[11px] text-slate-500">Vans, Converse, or flat lifters</p>
+                <p className="text-xs font-bold text-white">Flat Shoes On</p>
+                <p className="text-[11px] text-zinc-400">Vans, Converse, or flat lifters</p>
               </div>
               <button
                 type="button"
                 onClick={onToggleFlatShoes}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0 ${
                   flatShoesVerified
-                    ? 'bg-teal-500 text-white'
-                    : 'bg-pink-100 text-pink-800 hover:bg-pink-200'
+                    ? 'bg-[#25e86a] text-black'
+                    : 'bg-[#18181b] border border-zinc-800 text-zinc-300 hover:bg-[#222226]'
                 }`}
               >
                 {flatShoesVerified ? 'Checked' : 'Verify'}
@@ -918,16 +917,16 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
           </section>
 
           {/* Low-Impact Cardio */}
-          <section aria-labelledby="liss-cardio-heading" className="bg-white border border-pink-200/80 rounded-3xl p-6 space-y-3.5">
-            <div className="flex items-center gap-1.5 text-xs text-teal-600 font-bold">
-              <Footprints className="w-4 h-4 text-pink-500" />
-              <h3 id="liss-cardio-heading" className="text-sm font-bold text-slate-900">
+          <section aria-labelledby="liss-cardio-heading" className="bg-[#121214] border border-zinc-800/90 rounded-3xl p-6 space-y-3.5">
+            <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-bold">
+              <Footprints className="w-4 h-4 text-[#25e86a]" />
+              <h3 id="liss-cardio-heading" className="text-sm font-bold text-white">
                 Ankle-Safe Cardio
               </h3>
             </div>
 
             <label className="block">
-              <span className="text-xs text-slate-500">Pick low-impact cardio variation</span>
+              <span className="text-xs text-zinc-400">Pick low-impact cardio variation</span>
               <select
                 value={
                   CARDIO_MODALITIES.some((m) => m.id === lissModality)
@@ -935,7 +934,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                     : CARDIO_MODALITIES[0].id
                 }
                 onChange={(e) => onUpdateLiss(e.target.value, lissMinutesToday)}
-                className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900 font-medium"
+                className="mt-1 w-full px-3 py-2 text-xs bg-[#18181b] border border-zinc-800 rounded-xl text-white font-medium"
               >
                 {(['Treadmill', 'Stairmaster', 'Row Machine', 'Bike & Elliptical'] as const).map(
                   (category) => (
@@ -955,7 +954,7 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               const activeMod =
                 CARDIO_MODALITIES.find((m) => m.id === lissModality) || CARDIO_MODALITIES[0];
               return (
-                <p className="text-[11px] text-teal-800 bg-teal-50/70 border border-teal-200/60 rounded-xl px-3 py-2">
+                <p className="text-[11px] text-zinc-300 bg-[#18181b] border border-zinc-800 rounded-xl px-3 py-2">
                   {activeMod.ankleSafetyNote}
                 </p>
               );
@@ -963,8 +962,8 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
 
             <div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">Minutes today</span>
-                <span className="font-mono font-bold text-pink-600 tabular-nums">{lissMinutesToday} mins</span>
+                <span className="text-zinc-400">Minutes today</span>
+                <span className="font-mono font-bold text-[#25e86a] tabular-nums">{lissMinutesToday} mins</span>
               </div>
               <div className="flex items-center gap-1.5 mt-2">
                 {[15, 25, 30, 45].map((mins) => (
@@ -972,10 +971,10 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                     key={mins}
                     type="button"
                     onClick={() => onUpdateLiss(lissModality, mins)}
-                    className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-mono font-bold transition-colors whitespace-nowrap shrink-0 ${
+                    className={`flex-1 py-1.5 px-2 rounded-full text-xs font-mono font-bold transition-colors whitespace-nowrap shrink-0 ${
                       lissMinutesToday === mins
-                        ? 'bg-pink-500 text-white'
-                        : 'bg-teal-50 text-teal-800 hover:bg-teal-100'
+                        ? 'bg-[#25e86a] text-black'
+                        : 'bg-[#18181b] border border-zinc-800 text-zinc-300 hover:bg-[#222226]'
                     }`}
                   >
                     {mins}m
@@ -984,10 +983,10 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
               </div>
             </div>
 
-            <div className="pt-2 border-t border-pink-100 space-y-1.5">
+            <div className="pt-2 border-t border-zinc-800 space-y-1.5">
               {ANKLE_SAFETY_RULES.map((rule) => (
-                <p key={rule.title} className="text-[11px] text-slate-500">
-                  <strong className="text-slate-700">{rule.title}:</strong> {rule.detail}
+                <p key={rule.title} className="text-[11px] text-zinc-400">
+                  <strong className="text-white">{rule.title}:</strong> {rule.detail}
                 </p>
               ))}
             </div>
