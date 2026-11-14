@@ -183,7 +183,7 @@ function loadHydratedAppState() {
       lissModality:
         typeof parsed.lissModality === 'string'
           ? parsed.lissModality
-          : 'Incline Treadmill Walk',
+          : 'Treadmill — High Incline Walk',
       customWorkouts: savedCustomWorkouts,
       scheduleOverrides: savedScheduleOverrides,
     };
@@ -247,7 +247,7 @@ export default function App() {
     () => initialHydrated?.lungeSwappedToBss ?? false
   );
   const [lissModality, setLissModality] = useState<string>(
-    () => initialHydrated?.lissModality ?? 'Incline Treadmill Walk'
+    () => initialHydrated?.lissModality ?? 'Treadmill — High Incline Walk'
   );
   const [lissMinutesToday, setLissMinutesToday] = useState<number>(
     () => initialHydrated?.lissMinutesToday ?? 0

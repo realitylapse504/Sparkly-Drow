@@ -3,6 +3,8 @@ import {
   WORKOUT_PLANS,
   ANKLE_WARMUP_PROTOCOL,
   ANKLE_SAFETY_RULES,
+  CARDIO_MODALITIES,
+  PREFERRED_EXERCISE_LIBRARY,
   createCustomWorkoutPlan,
   resolveWeeklySchedule,
   type WorkoutDayPlan,
@@ -380,16 +382,70 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                   key={idx}
                   className="p-3 rounded-2xl bg-white border border-teal-200/80 grid grid-cols-1 sm:grid-cols-12 gap-2 items-end"
                 >
-                  <label className="sm:col-span-4 block text-[11px] text-slate-500">
-                    Exercise #{idx + 1} Name
-                    <input
-                      type="text"
-                      value={row.name}
-                      onChange={(e) => handleUpdateDraftExercise(idx, 'name', e.target.value)}
-                      placeholder="e.g., Cable Glute Kickbacks"
-                      className="mt-0.5 w-full px-2.5 py-1.5 text-xs bg-white border border-teal-200 rounded-lg text-slate-900"
-                    />
-                  </label>
+                  <div className="sm:col-span-4 space-y-1">
+                    <label className="block text-[11px] text-slate-500">
+                      Quick-Pick Preferred Exercise (or type below)
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          const chosen = PREFERRED_EXERCISE_LIBRARY.find(
+                            (p) => p.name === e.target.value
+                          );
+                          if (chosen) {
+                            setDraftExercises((prev) =>
+                              prev.map((r, i) =>
+                                i === idx
+                                  ? {
+                                      name: chosen.name,
+                                      sets: String(chosen.defaultSets),
+                                      reps: chosen.defaultReps,
+                                      weightLbs: String(chosen.defaultWeightLbs),
+                                      tip: chosen.tip,
+                                    }
+                                  : r
+                              )
+                            );
+                          }
+                        }}
+                        aria-label={`Quick-pick preferred exercise for row ${idx + 1}`}
+                        className="mt-0.5 w-full px-2 py-1 text-[11px] bg-teal-50/60 border border-teal-200 rounded-lg text-teal-900 font-medium"
+                      >
+                        <option value="">Choose from Preferred Exercise Pool...</option>
+                        {(
+                          [
+                            'Glutes',
+                            'Back',
+                            'Legs',
+                            'Core',
+                            'Arms / Curls',
+                            'Chest',
+                            'Shoulders',
+                          ] as const
+                        ).map((cat) => (
+                          <optgroup key={cat} label={cat}>
+                            {PREFERRED_EXERCISE_LIBRARY.filter((p) => p.category === cat).map(
+                              (item) => (
+                                <option key={item.name} value={item.name}>
+                                  {item.name}
+                                  {item.activationTier ? ` (${item.activationTier})` : ''}
+                                </option>
+                              )
+                            )}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-[11px] text-slate-500">
+                      Exercise #{idx + 1} Name
+                      <input
+                        type="text"
+                        value={row.name}
+                        onChange={(e) => handleUpdateDraftExercise(idx, 'name', e.target.value)}
+                        placeholder="e.g., Barbell Hip Thrust"
+                        className="mt-0.5 w-full px-2.5 py-1.5 text-xs bg-white border border-teal-200 rounded-lg text-slate-900"
+                      />
+                    </label>
+                  </div>
                   <label className="sm:col-span-2 block text-[11px] text-slate-500">
                     Sets
                     <input
@@ -684,8 +740,8 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
                       >
                         <ArrowLeftRight className="w-3.5 h-3.5" />
                         {lungeSwappedToBss
-                          ? 'Switch to Dumbbell Low Box Step-Up'
-                          : 'Ankle Swap: Bulgarian Split Squat'}
+                          ? 'Switch to Dumbbell Low Box Step-Up (MAX)'
+                          : 'Ankle Swap: Single-Leg Hip Thrust (MED)'}
                       </button>
                     )}
                   </div>
@@ -871,17 +927,39 @@ export const WorkoutsView: React.FC<WorkoutsViewProps> = ({
             </div>
 
             <label className="block">
-              <span className="text-xs text-slate-500">Pick low-impact cardio</span>
+              <span className="text-xs text-slate-500">Pick low-impact cardio variation</span>
               <select
-                value={lissModality}
+                value={
+                  CARDIO_MODALITIES.some((m) => m.id === lissModality)
+                    ? lissModality
+                    : CARDIO_MODALITIES[0].id
+                }
                 onChange={(e) => onUpdateLiss(e.target.value, lissMinutesToday)}
-                className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900"
+                className="mt-1 w-full px-3 py-2 text-xs bg-white border border-teal-200 rounded-xl text-slate-900 font-medium"
               >
-                <option value="Incline Treadmill Walk">Incline Treadmill Walk</option>
-                <option value="Stationary Bike">Stationary Bike</option>
-                <option value="Elliptical Trainer">Elliptical</option>
+                {(['Treadmill', 'Stairmaster', 'Row Machine', 'Bike & Elliptical'] as const).map(
+                  (category) => (
+                    <optgroup key={category} label={category}>
+                      {CARDIO_MODALITIES.filter((m) => m.category === category).map((mod) => (
+                        <option key={mod.id} value={mod.id}>
+                          {mod.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )
+                )}
               </select>
             </label>
+
+            {(() => {
+              const activeMod =
+                CARDIO_MODALITIES.find((m) => m.id === lissModality) || CARDIO_MODALITIES[0];
+              return (
+                <p className="text-[11px] text-teal-800 bg-teal-50/70 border border-teal-200/60 rounded-xl px-3 py-2">
+                  {activeMod.ankleSafetyNote}
+                </p>
+              );
+            })()}
 
             <div>
               <div className="flex items-center justify-between text-xs">

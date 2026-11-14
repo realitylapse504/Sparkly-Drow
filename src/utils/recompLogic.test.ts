@@ -389,10 +389,28 @@ test('resetWorkoutSessionForDay resets only the currently highlighted day workou
   assert.equal(result.setCompletionMap.ua_1_set_1, true);
 });
 
-test('all workouts and exercises use specific movement names with no broad or "or" exercise titles', () => {
+test('all workouts, PREFERRED_EXERCISE_LIBRARY, and CARDIO_MODALITIES use specific names and prioritize MAX/MED lifts', async () => {
+  const { PREFERRED_EXERCISE_LIBRARY, CARDIO_MODALITIES } = await import('../data/programData');
   assert.equal(WORKOUT_PLANS.length, 5);
+  assert.ok(PREFERRED_EXERCISE_LIBRARY.length >= 40);
+  assert.ok(CARDIO_MODALITIES.length >= 9);
+
+  // Verify Lower A, Full-Body, and Lower B prioritize MAX/MED lifts at the top
+  const lowerA = WORKOUT_PLANS.find((p) => p.id === 'lower_a')!;
+  assert.equal(lowerA.exercises[0].name, 'Barbell Hip Thrust');
+  assert.equal(lowerA.exercises[1].name, 'Barbell Romanian Deadlift');
+
+  const fullBody = WORKOUT_PLANS.find((p) => p.id === 'full_body_session')!;
+  assert.equal(fullBody.exercises[0].name, 'Barbell Conventional Deadlift');
+  assert.equal(fullBody.exercises[1].name, 'Weighted Cable Squat');
+
+  const lowerB = WORKOUT_PLANS.find((p) => p.id === 'lower_b')!;
+  assert.equal(lowerB.exercises[0].name, 'Barbell Hack Squat');
+  assert.equal(lowerB.exercises[1].name, 'Wide-Stance Dumbbell Sumo Squat');
+  assert.equal(lowerB.exercises[2].ankleSwapOption?.swapName, 'Single-Leg Bench Hip Thrust');
+
   for (const plan of WORKOUT_PLANS) {
-    assert.ok(plan.exercises.length >= 4, `${plan.id} should have at least 4 specific exercises`);
+    assert.ok(plan.exercises.length >= 6, `${plan.id} should have at least 6 specific exercises`);
     for (const ex of plan.exercises) {
       assert.equal(
         /\bor\b/i.test(ex.name),
@@ -414,6 +432,7 @@ test('all workouts and exercises use specific movement names with no broad or "o
     }
   }
 });
+
 
 
 
